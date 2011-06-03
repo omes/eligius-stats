@@ -1,0 +1,7 @@
+api/
+cache/
+eu/
+us/
+analytics.inc.php
+servers.inc.php
+sql.inc.php

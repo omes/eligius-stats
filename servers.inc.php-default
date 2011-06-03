@@ -1,0 +1,13 @@
+<?php
+
+// Array of the servers. Key index is short name, content is array(<Pretty name>, <API root>).
+$SERVERS = array(
+	'eu' => array('Eligius-EU', '/var/lib/eligius/eu'),
+	'us' => array('Eligius-US', '/var/lib/eligius/us')
+);
+
+// Used for server status. Key is the pool address (in address:port format), the value is the displayed address.
+$SERVERS_ADDRESSES = array(
+        '10.0.1.1:8337' => 'eu.mining.eligius.st:8337',
+        'us.mining.eligius.st:8337' => 'us.mining.eligius.st:8337'
+);
