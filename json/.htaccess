@@ -6,3 +6,6 @@ SetOutputFilter DEFLATE
 
 # Send the right content-type
 AddType application/json .json
+
+# Cache the json files, but not for too long (needed by IE)
+ExpiresDefault "modification plus 15 minutes"
