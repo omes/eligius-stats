@@ -51,7 +51,12 @@ ul#top_contrib > li.rank3 > span {
 div.errors > p {
 	margin-top: 0;
 	padding: 0.5em;
-	width: 70em;
+	width: 50em;
 	border: 2px solid red;
 	background-color: #FFCCCC;
+}
+
+div.graph {
+	display: inline-block;
+	margin-left: 1em;
 }

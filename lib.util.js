@@ -25,3 +25,7 @@ EligiusUtils.formatHashrate = function(rate, axis) {
 		return (rate / 1000000).toFixed(2) + " Mhashes/sec";
 	} else return (rate / 1000000000).toFixed(2) + " Ghashes/sec";
 }
+
+EligiusUtils.formatBTC = function(money, axis) {
+	return money.toFixed(3) + " BTC";
+}

@@ -164,11 +164,11 @@ function showTopContributors() {
 			$server = $t['server'];
 			
 			$hashrate = prettyHashrate($hashrate);
-			$server = $SERVERS[$server][0];
+			$pServer = $SERVERS[$server][0];
 			$address = str_pad($address, 34, '_', STR_PAD_RIGHT); /* Yes, this is a trick */
 			$address = str_replace('_', '&nbsp;', $address);
 
-			echo "<li class=\"rank$i\"><span>$address on $server with $hashrate on average</span></li>\n";
+			echo "<li class=\"rank$i\"><span><a href=\"./$server/$address\">$address</a> on $pServer with $hashrate on average</span></li>\n";
 		}
 	} else echo "N/A\n";
 
@@ -179,6 +179,7 @@ function showContributingInstructions() {
 	echo <<<EOT
 <h2>Contribute !</h2>
 <ul>
+<li style="color: darkred;"><strong class="more">How do I start mining on Eligius ?</strong> Read the <a href="http://eligius.st/wiki/index.php/Getting_Started">Getting started page</a> on the wiki.</li>
 <li>Contact me (Artefact2) for a statistics-related issue : &lt;a<span>r</span>t<span><span>ef<span>act2</span>@</span>gma</span><span>il.c</span>om&gt;</li>
 <li>Join us on IRC for more interactive support : #eligius on irc.freenode.net <a href="http://webchat.freenode.net/?channels=eligius">(chat directly in your browser)</a></li>
 <li>Show your support by donating :
@@ -200,7 +201,7 @@ function showHashRateGraph() {
 
 	echo "<h2>Hashrate graph</h2>\n";
 	echo "<div id=\"eligius_pool_hashrate_errors\" class=\"errors\"></div>\n";
-	echo "<div id=\"eligius_pool_hashrate\" style=\"width:700px;height:350px;\">You must enable Javascript to see the graph.</div>\n";
+	echo "<div id=\"eligius_pool_hashrate\" style=\"width:750px;height:350px;\">You must enable Javascript to see the graph.</div>\n";
 	echo "<script type=\"text/javascript\">\n$(function () {\n";
 	echo "$('#eligius_pool_hashrate').html('');\nvar series = [];\n";
 	echo <<<EOT
@@ -219,7 +220,7 @@ EOT;
 		$uri = './'.DATA_RELATIVE_ROOT.'/'.T_HASHRATE_POOL.'_'.$name.DATA_SUFFIX;
 		echo <<<EOT
 $.get("$uri", "", function(data, textStatus, xhr) {
-	series.push({ data: data, label: "$prettyName", steps: true, color: "$color" });
+	series.push({ data: data, label: "$prettyName", color: "$color" });
 	$.plot($('#eligius_pool_hashrate'), series, options);
 }, "json").error(function() {
 	$('#eligius_pool_hashrate_errors').append('<p>An error happened while loading the data for the $prettyName server.<br />Try reloading the page.</p>');
@@ -231,6 +232,11 @@ EOT;
 	echo "});\n</script>\n";
 }
 
+if($_SERVER['QUERY_STRING'] !== "dispatch_request") {
+	header('HTTP/1.1 404 Not Found', true, 404);
+	die;
+}
+
 echo <<<EOT
 <!DOCTYPE html>
 <html>
@@ -239,8 +245,9 @@ echo <<<EOT
 <link type="text/css" rel="stylesheet" href="./web.theme.css">
 <!--[if lte IE 8]><script type="text/javascript" src="./flot/excanvas.min.js"></script><![endif]-->
 <script type="text/javascript" src="./lib.util.js"></script>
-<script type="text/javascript" src="./flot/jquery.min.js"></script>
-<script type="text/javascript" src="./flot/jquery.flot.min.js"></script>
+<script type="text/javascript" src="./flot/jquery.js"></script>
+<script type="text/javascript" src="./flot/jquery.flot.js"></script>
+<title>Eligius pool statistics</title>
 </head>
 <body>
 

@@ -17,7 +17,7 @@
 
 namespace Artefact2\EligiusStats;
 
-const VERSION = '1.99-dev';
+const VERSION = '2.0';
 
 const T_BALANCE_CURRENT_BLOCK = 'balance_current_block';
 const T_BALANCE_UNPAID_REWARD = 'balance_unpaid';
@@ -26,7 +26,7 @@ const T_HASHRATE_INDIVIDUAL = 'hashrate';
 const T_HASHRATE_POOL = 'hashrate_total';
 
 const HASHRATE_AVERAGE = 10800; // Show a 3-hour average for individual stats
-const HASHRATE_PERIOD = 300; // Use a 5-minute average to compute the hashrate
+const HASHRATE_PERIOD = 900; // Use a 15-minute average to compute the hashrate
 const HASHRATE_PERIOD_LONG = 3600;
 const HASHRATE_LAG = 180; // Use a 3-minute delay, to cope with MySQL replication lag
 
@@ -251,6 +251,46 @@ function updateTopContributors($numContributors = NUMBER_OF_TOP_CONTRIBUTORS) {
 }
 
 /**
+ * Cache a random address currently contributing on a server.
+ * @param string $serverName the name of the server
+ * @param string $apiRoot the API root for this server
+ * @return bool true if the operation was successful.
+ */
+function updateRandomAddress($serverName, $apiRoot) {
+	$addresses = getActiveAddresses($apiRoot);
+	if($addresses === false) return false;
+	if(count($addresses) == 0) return false;
+
+	shuffle($addresses);
+	$address = array_pop($addresses);
+	return cacheStore('random_address_'.$serverName, $address);
+}
+
+/**
+ * Cache the average hashrates of all the users.
+ * @return bool true if the operation was successful.
+ */
+function updateAverageHashrates() {
+	$end = time() - HASHRATE_LAG;
+	$start = $end - HASHRATE_AVERAGE;
+	$q = mysql_query("
+		SELECT username AS address, server, ((COUNT(*) * POW(2, 32)) / ".HASHRATE_AVERAGE.") AS hashrate
+		FROM shares
+		WHERE our_result <> 'N'
+			AND time BETWEEN $start AND $end
+		GROUP BY server, username
+		ORDER BY time DESC
+	");
+
+	$averages = array();
+	while($r = mysql_fetch_assoc($q)) {
+		$averages[$r['server']][$r['address']] = $r['hashrate'];
+	}
+
+	return cacheStore('average_hashrates', $averages);
+}
+
+/**
  * Get an associative array of "instant" hashrates for the addresses that submitted shares recently.
  * This is a costly operation !
  * @param string $serverName the name of the server (should coincide with the "server" column in MySQL)
@@ -369,4 +409,28 @@ function getServerStatus($server, $port, $timeout, &$status, &$latency) {
 
 	$status = S_WORKING;
 	return true;
+}
+
+/**
+ * Get the balance of an address on one server.
+ * @param string $apiRoot the API root of the server.
+ * @param string $address return the balance of this address
+ * @return array|bool false if an error happened, or array($paid, $unpaid, $current).
+ */
+function getBalance($apiRoot, $address) {
+	$balances = getBalanceData($apiRoot);
+	$latest = file_get_contents($apiRoot.'/blocks/latest.json');
+	$latest = json_decode($latest, true);
+	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
+		trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
+		return false;
+	}
+
+	if(!isset($balances[$address]['balance'])) return false;
+
+	$paid = isset($latest[$address]['everpaid']) ? satoshiToBTC($latest[$address]['everpaid']) : 0.0;
+	$unpaid = isset($latest[$address]['balance']) ? satoshiToBTC($latest[$address]['balance']) : 0.0;
+	$current = satoshiToBTC(bcsub($balances[$address]['balance'], isset($latest[$address]['balance']) ? $latest[$address]['balance'] : 0, 0));
+
+	return array($paid, $unpaid, $current);
 }

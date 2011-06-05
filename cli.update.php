@@ -48,6 +48,10 @@ $commands = array(
 		return $r;
 	},
 
+	'average_hashrates' => function() {
+		return updateAverageHashrates();
+	},
+
 	'pool_hashrates' => function() use($SERVERS) {
 		$r = true;
 		foreach($SERVERS as $name => $data) {
@@ -77,6 +81,15 @@ $commands = array(
 
 	'top_contributors' => function() {
 		return updateTopContributors();
+	},
+
+	'random_addresses' => function() use($SERVERS) {
+		$r = true;
+		foreach($SERVERS as $serverName => $data) {
+			list(, $apiRoot) = $data;
+			$r = $r && updateRandomAddress($serverName, $apiRoot);
+		}
+		return $r;
 	},
 );
 

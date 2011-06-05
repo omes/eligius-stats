@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Change this to your local root
+RewriteBase /~artefact2
+
+RewriteRule ^/?(lib|inc|cli)\.(.+)\.php$ web.mainpage.php?dispatch_request [L]
+RewriteRule ^/?$ web.mainpage.php?dispatch_request [L]
+
+RewriteRule ^/?(eu|us)/1[a-zA-Z0-9]+(\.htm)?$ web.individual.php [L]
