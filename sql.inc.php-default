@@ -1,6 +1,0 @@
-<?php
-
-// Copy this file to sql.inc.php (or rename it to remove the -default), and put your MySQL credentials here.
-
-mysql_connect('127.0.0.1', '__USER__', '__PASSWORD__');
-mysql_select_db('eligius');

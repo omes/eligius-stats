@@ -1,5 +1,9 @@
 <?php
 
+/*
+ * Copy this file to inc.servers.php after reviewing its contents !
+ */
+
 // Array of the servers. Key index is short name, content is array(<Pretty name>, <API root>).
 $SERVERS = array(
 	'eu' => array('Eligius-EU', '/var/lib/eligius/eu'),

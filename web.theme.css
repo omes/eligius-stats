@@ -1,0 +1,57 @@
+body {
+	font-family: monospace;
+	font-size: 0.9em;
+}
+
+small {
+	font-size: 0.8em;
+	color: #999;
+}
+
+strong.more {
+	font-size: 1.1em;
+}
+
+strong.moremore {
+	font-size: 1.4em;
+}
+
+table#pool_status {
+	border-collapse: collapse;
+}
+
+table#pool_status > thead > tr > th, table#pool_status > tbody > tr > td {
+	padding: 0.6em;
+	text-align: center;
+	vertical-align: middle;
+}
+
+table#pool_status > thead > tr > th {
+	border-bottom:  1px solid black;
+}
+
+ul#top_contrib > li.rank1 > span,
+ul#top_contrib > li.rank2 > span,
+ul#top_contrib > li.rank3 > span {
+	display: inline-block;
+}
+
+ul#top_contrib > li.rank1 > span {
+	background-color: #FFD700;
+}
+
+ul#top_contrib > li.rank2 > span {
+	background-color: #E5E4E2;
+}
+
+ul#top_contrib > li.rank3 > span {
+	background-color: #CD7F32;
+}
+
+div.errors > p {
+	margin-top: 0;
+	padding: 0.5em;
+	width: 70em;
+	border: 2px solid red;
+	background-color: #FFCCCC;
+}

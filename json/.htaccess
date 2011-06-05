@@ -1,0 +1,8 @@
+# Forbid the listing of all the files
+Options -Indexes
+
+# Compress stuff
+SetOutputFilter DEFLATE
+
+# Send the right content-type
+AddType application/json .json

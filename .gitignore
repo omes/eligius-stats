@@ -1,7 +1,3 @@
-api/
-cache/
-eu/
-us/
-analytics.inc.php
-servers.inc.php
-sql.inc.php
+cache/*.cache
+json/*.json
+inc.*.php
