@@ -26,6 +26,10 @@ const INTERVAL = HASHRATE_PERIOD;
 foreach($SERVERS as $name => $data) {
 	$now = time();
 	$current = $now - TIMESPAN_SHORT + 42;
+
+	list(, $apiRoot) = $data;
+	$addresses = getActiveAddresses($apiRoot);
+
 	while($current < $now - INTERVAL) {
 		$start = $current;
 		$end = $current + INTERVAL;
@@ -38,9 +42,16 @@ foreach($SERVERS as $name => $data) {
 			GROUP BY address
 		");
 
+		$row = array();
 		while($r = mysql_fetch_assoc($hashrates)) {
 			$hashrate = $r['hashrate'];
 			$address = $r['address'];
+
+			$row[$address] = $hashrate;
+		}
+		
+		foreach($addresses as $address) {
+			$hashrate = isset($row[$address]) ? $row[$address] : 0;
 
 			updateData(T_HASHRATE_INDIVIDUAL, $name.'_'.$address, $current, $hashrate, TIMESPAN_SHORT);
 		}
