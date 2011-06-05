@@ -42,11 +42,7 @@ function showHashrateAverage($server, $address) {
 	}
 }
 
-function showBalance($server, $address) {
-	global $SERVERS;
-	list(, $apiRoot) = $SERVERS[$server];
-	list(, $unpaid, $current) = getBalance($apiRoot, $address);
-
+function showBalance($unpaid, $current) {
 	echo <<<EOT
 <h2>Balance</h2>
 <ul>
@@ -159,6 +155,9 @@ EOT;
 list($prettyName, $apiRoot) = $SERVERS[$server];
 $addresses = getActiveAddresses($apiRoot);
 
+list(, $unpaid, $current) = getBalance($apiRoot, $address);
+$total = bcadd($unpaid, $current, 8).' BTC';
+
 if(!in_array($address, $addresses)) {
 	header('HTTP/1.1 404 Not Found', true, 404);
 	echo <<<EOT
@@ -194,7 +193,7 @@ echo <<<EOT
 <script type="text/javascript" src="../flot/jquery.js"></script>
 <script type="text/javascript" src="../flot/jquery.flot.js"></script>
 <script type="text/javascript" src="../flot/jquery.flot.stack.js"></script>
-<title>$address on $prettyName - Eligius pool</title>
+<title>($total) $address on $prettyName - Eligius pool</title>
 </head>
 <body>
 
@@ -202,7 +201,7 @@ EOT;
 
 echo "<h1>$address on $prettyName</h1>\n";
 
-showBalance($server, $address);
+showBalance($unpaid, $current);
 showHashrateAverage($server, $address);
 echo "<h2>Graphs</h2>\n";
 showBalanceGraph($server, $address);
