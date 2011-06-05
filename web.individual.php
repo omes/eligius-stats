@@ -20,6 +20,21 @@ namespace Artefact2\EligiusStats;
 require __DIR__.'/lib.eligius.php';
 require __DIR__.'/inc.servers.php';
 
+function makeTicks() {
+	$now = time();
+	$now -= $now % 86400;
+	$threshold = $now - TIMESPAN_SHORT + 1;
+
+	$ticks = array();
+	while($now > $threshold) {
+		$ticks[] = bcmul($now, 1000, 0);
+		$now -= 86400;
+	}
+
+	$ticks = array_reverse($ticks);
+	return '['.implode(', ', $ticks).']';
+}
+
 function showFooter() {
 	echo <<<EOT
 <hr />
@@ -58,6 +73,7 @@ function showBalanceGraph($server, $address) {
 	$paidUri = '../'.DATA_RELATIVE_ROOT.'/'.T_BALANCE_ALREADY_PAID.'_'.$server.'_'.$address.DATA_SUFFIX;
 	$unpaidUri = '../'.DATA_RELATIVE_ROOT.'/'.T_BALANCE_UNPAID_REWARD.'_'.$server.'_'.$address.DATA_SUFFIX;
 	$currentUri = '../'.DATA_RELATIVE_ROOT.'/'.T_BALANCE_CURRENT_BLOCK.'_'.$server.'_'.$address.DATA_SUFFIX;
+	$ticks = makeTicks();
 
 	echo "<div class=\"graph\">\n<div id=\"eligius_balance_errors\" class=\"errors\"></div>\n";
 	echo "<div id=\"eligius_balance\" style=\"width:700px;height:350px;\">You must enable Javascript to see the graph.</div>\n</div>\n";
@@ -66,7 +82,7 @@ function showBalanceGraph($server, $address) {
 	echo <<<EOT
 var options = {
 	legend: { position: "nw" },
-	xaxis: { mode: "time" },
+	xaxis: { mode: "time", ticks: $ticks },
 	yaxis: { position: "right", tickFormatter: EligiusUtils.formatBTC },
 	series: { lines: { fill: 0.3, steps: true }, stack: true }
 };
@@ -101,6 +117,7 @@ EOT;
 
 function showHashRateGraph($server, $address) {
 	$uri = '../'.DATA_RELATIVE_ROOT.'/'.T_HASHRATE_INDIVIDUAL.'_'.$server.'_'.$address.DATA_SUFFIX;
+	$ticks = makeTicks();
 
 	echo "<div class=\"graph\">\n<div id=\"eligius_indiv_hashrate_errors\" class=\"errors\"></div>\n";
 	echo "<div id=\"eligius_indiv_hashrate\" style=\"width:750px;height:350px;\">You must enable Javascript to see the graph.</div>\n</div>\n";
@@ -109,7 +126,7 @@ function showHashRateGraph($server, $address) {
 	echo <<<EOT
 var options = {
 	legend: { position: "nw" },
-	xaxis: { mode: "time" },
+	xaxis: { mode: "time", ticks: $ticks },
 	yaxis: { position: "right", tickFormatter: EligiusUtils.formatHashrate },
 	series: { lines: { fill: 0.3 }, stack: true }
 };
