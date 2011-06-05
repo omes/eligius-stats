@@ -29,3 +29,17 @@ EligiusUtils.formatHashrate = function(rate, axis) {
 EligiusUtils.formatBTC = function(money, axis) {
 	return money.toFixed(3) + " BTC";
 }
+
+EligiusUtils.toggleAutorefresh = function() {
+	if(EligiusUtils.autorefresh) {
+		EligiusUtils.autorefresh = false;
+		clearTimeout(EligiusUtils.autorefresh_t);
+		$("#autorefresh_message").html(' &mdash; The page will no longer refresh automatically.');
+	} else {
+		EligiusUtils.autorefresh = true;
+		EligiusUtils.autorefresh_t = setTimeout(function() {
+			window.location = "?autorefresh=1&nonce=" + Math.random();
+		}, 300000);
+		$("#autorefresh_message").html(' &mdash; The page will refresh automatically every 5 minutes.');
+	}
+}

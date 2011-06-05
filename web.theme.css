@@ -60,3 +60,9 @@ div.graph {
 	display: inline-block;
 	margin-left: 1em;
 }
+
+a[onclick] {
+	text-decoration: underline;
+	color: blue;
+	cursor: pointer;
+}

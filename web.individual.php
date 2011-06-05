@@ -39,6 +39,7 @@ function showFooter() {
 	echo <<<EOT
 <hr />
 <p><a href="../">&larr; Get back to the main page</a></p>
+<p><a onclick="EligiusUtils.toggleAutorefresh();">Toggle autorefresh</a><small id="autorefresh_message"></small></p>
 EOT;
 
 }
@@ -142,7 +143,9 @@ EOT;
 	echo "});\n</script>\n";
 }
 
-$uri = explode('/', $_SERVER['REQUEST_URI']);
+$uri = explode('?', $_SERVER['REQUEST_URI']);
+$uri = array_shift($uri);
+$uri = explode('/', $uri);
 $address = array_pop($uri);
 $server = array_pop($uri);
 
@@ -228,6 +231,10 @@ showFooter();
 
 if(file_exists(__DIR__.'/inc.analytics.php')) {
 	require __DIR__.'/inc.analytics.php';
+}
+
+if(isset($_GET['autorefresh']) && $_GET['autorefresh']) {
+	echo "<script type=\"text/javascript\">EligiusUtils.toggleAutorefresh();</script>\n";
 }
 
 echo "</body>\n</html>\n";
