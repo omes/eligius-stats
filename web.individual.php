@@ -49,10 +49,11 @@ function showHashrateAverage($server, $address) {
 	$averages = cacheFetch('average_hashrates', $success);
 
 	if($success && isset($averages[$server][$address])) {
-		$rate = prettyHashrate($averages[$server][$address]);
-		echo "<h2>Hashrate</h2>\n<p>This user is contributing to the pool by doing, in average, <strong class=\"moremore\">$rate</strong>. This is a 3-hour average, and may or may not reflect your real hashrate, depending on luck.</p>\n";
+		list($shares, $rate) = $averages[$server][$address];
+		$rate = prettyHashrate($rate);
+		echo "<h2>Hashrate</h2>\n<p>This user is contributing to the pool by doing, in average, <strong class=\"moremore\">$rate</strong> (<strong>$shares</strong> shares submitted in the last 3 hours). This is an average, and may or may not reflect your real hashrate, depending on luck.</p>\n";
 	} else if($success) {
-		echo "<h2>Hashrate</h2>\n<p>This user has not contributed a share in the last three hours.</p>\n";
+		echo "<h2>Hashrate</h2>\n<p>This user has not submitted a share in the last three hours.</p>\n";
 	} else {
 		echo "<h2>Hashrate</h2>\n<p>The averages are not available at the moment. Try later !</p>\n";
 	}

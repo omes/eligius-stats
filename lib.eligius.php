@@ -274,7 +274,7 @@ function updateAverageHashrates() {
 	$end = time() - HASHRATE_LAG;
 	$start = $end - HASHRATE_AVERAGE;
 	$q = mysql_query("
-		SELECT username AS address, server, ((COUNT(*) * POW(2, 32)) / ".HASHRATE_AVERAGE.") AS hashrate
+		SELECT username AS address, server, COUNT(*) AS shares
 		FROM shares
 		WHERE our_result <> 'N'
 			AND time BETWEEN $start AND $end
@@ -284,7 +284,8 @@ function updateAverageHashrates() {
 
 	$averages = array();
 	while($r = mysql_fetch_assoc($q)) {
-		$averages[$r['server']][$r['address']] = $r['hashrate'];
+		$rate = floatval(bcdiv(bcmul($r['shares'], bcpow(2, 32)), HASHRATE_AVERAGE));
+		$averages[$r['server']][$r['address']] = array($r['shares'], $rate);
 	}
 
 	return cacheStore('average_hashrates', $averages);
