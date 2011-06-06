@@ -43,3 +43,37 @@ EligiusUtils.toggleAutorefresh = function() {
 		$("#autorefresh_message").html(' &mdash; The page will refresh automatically every 5 minutes.');
 	}
 }
+
+EligiusUtils.movingAverage = function(data, window, interval) {
+	var points = [];
+	var c = data.length;
+	if(c == 0) return points;
+
+	var start = data[0][0];
+	var stop = start + window;
+	var sum, i;
+	var k = 0;
+	while(stop <= data[c - 1][0]) {
+		sum = 0;
+		for(i = k; i < (c - 1); ++i) {
+			if(data[i + 1][0] < start) {
+				++k;
+				continue;
+			}
+
+			if(data[i + 1][0] <= stop) {
+				sum += data[i][1] * Math.min(data[i + 1][0] - data[i][0], data[i + 1][0] - start);
+			} else {
+				sum += data[i][1] * Math.min(stop - data[i][0], stop - start);
+				break;
+			}
+		}
+
+		points.push([stop, sum / window]);
+
+		start += interval;
+		stop += interval;
+	}
+
+	return points;
+}

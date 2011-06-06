@@ -119,6 +119,7 @@ EOT;
 function showHashRateGraph($server, $address) {
 	$uri = '../'.DATA_RELATIVE_ROOT.'/'.T_HASHRATE_INDIVIDUAL.'_'.$server.'_'.$address.DATA_SUFFIX;
 	$ticks = makeTicks();
+	$interval = HASHRATE_PERIOD * 1000;
 
 	echo "<div class=\"graph\">\n<div id=\"eligius_indiv_hashrate_errors\" class=\"errors\"></div>\n";
 	echo "<div id=\"eligius_indiv_hashrate\" style=\"width:750px;height:350px;\">You must enable Javascript to see the graph.</div>\n</div>\n";
@@ -129,11 +130,13 @@ var options = {
 	legend: { position: "nw" },
 	xaxis: { mode: "time", ticks: $ticks },
 	yaxis: { position: "right", tickFormatter: EligiusUtils.formatHashrate },
-	series: { lines: { fill: 0.3 }, stack: true }
+	series: { lines: { fill: 0.3 } }
 };
 
 $.get("$uri", "", function(data, textStatus, xhr) {
-	series.push({ data: data, label: "Hashrate", color: "#D70A53" });
+	series.push({ data: data, label: "Hashrate", color: "#F36D91", lines: { lineWidth: 1 } });
+	series.push({ data: EligiusUtils.movingAverage(data, 10800000, $interval), label: "3-hour average", color: "#00AC6B", lines: { fill: false } });
+	series.push({ data: EligiusUtils.movingAverage(data, 43200000, $interval), label: "12-hour average", color: "#007046", lines: { fill: false } });
 	$.plot($('#eligius_indiv_hashrate'), series, options);
 }, "json").error(function() {
 	$('#eligius_indiv_hashrate_errors').append('<p>An error happened while loading the hashrate data.<br />Try reloading the page.</p>');
