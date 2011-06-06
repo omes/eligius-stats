@@ -77,3 +77,14 @@ EligiusUtils.movingAverage = function(data, window, interval) {
 
 	return points;
 }
+
+EligiusUtils.shiftData = function(data, shiftAmount) {
+	var points = [];
+	var c = data.length;
+	var i;
+	for(i = 0; i < c; ++i) {
+		points.push([data[i][0], data[i][1] + shiftAmount]);
+	}
+
+	return points;
+}

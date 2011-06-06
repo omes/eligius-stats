@@ -90,6 +90,7 @@ var options = {
 };
 
 $.get("$paidUri", "", function(data, textStatus, xhr) {
+	var alreadyPaid = data;
 	options.yaxis.min = data[0][1];
 	series.push({ data: data, label: "Already paid", color: "#062270" });
 	$.plot($('#eligius_balance'), series, options);
@@ -100,6 +101,7 @@ $.get("$paidUri", "", function(data, textStatus, xhr) {
 
 		$.get("$currentUri", "", function(data, textStatus, xhr) {
 			series.push({ data: data, label: "Current block estimate", color: "#FFE040" });
+			series.push({ data: EligiusUtils.shiftData(alreadyPaid, 1.0), label: "Payout threshold", color: "#FF0000", lines: { fill: false }, stack: false });
 			$.plot($('#eligius_balance'), series, options);
 		}, "json").error(function() {
 			$('#eligius_balance_errors').append('<p>An error happened while loading the "current block estimate" data.<br />Try reloading the page.</p>');
