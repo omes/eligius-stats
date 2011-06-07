@@ -16,17 +16,17 @@ strong.moremore {
 	font-size: 1.4em;
 }
 
-table#pool_status {
+table {
 	border-collapse: collapse;
 }
 
-table#pool_status > thead > tr > th, table#pool_status > tbody > tr > td {
+table > thead > tr > th, table > tbody > tr > td {
 	padding: 0.6em;
 	text-align: center;
 	vertical-align: middle;
 }
 
-table#pool_status > thead > tr > th {
+table > thead > tr > th {
 	border-bottom:  1px solid black;
 }
 
@@ -65,4 +65,8 @@ a[onclick] {
 	text-decoration: underline;
 	color: blue;
 	cursor: pointer;
+}
+
+table#pool_hashrate {
+	width: 750px;
 }

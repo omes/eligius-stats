@@ -196,10 +196,40 @@ EOT;
 
 }
 
+function showPoolHashRate() {
+	global $SERVERS;
+
+	echo "<h2>Hashrate</h2>\n<table id=\"pool_hashrate\">\n<thead>\n";
+
+	$total = 0;
+	$rates = array();
+	foreach($SERVERS as $name => $data) {
+		list($pName, $apiRoot) = $data;
+
+		if(file_exists($f = $apiRoot.'/hashrate.txt')) {
+			$rates[$pName] = prettyHashrate($rate = file_get_contents($f));
+			$total += $rate;
+		} else {
+			$rates[$pName] = 'N/A';
+		}
+	}
+
+	$rates['Combined'] = prettyHashrate($total);
+
+	echo "<tr>\n";
+	foreach(array_keys($rates) as $s) {
+		echo "<th>$s</th>";
+	}
+	echo "\n</tr>\n</thead>\n<tbody>\n<tr>\n";
+	foreach(array_values($rates) as $h) {
+		echo "<td>$h</td>";
+	}
+	echo "\n</tr>\n</tbody>\n</table>\n";
+}
+
 function showHashRateGraph() {
 	global $SERVERS;
 
-	echo "<h2>Hashrate graph</h2>\n";
 	echo "<div id=\"eligius_pool_hashrate_errors\" class=\"errors\"></div>\n";
 	echo "<div id=\"eligius_pool_hashrate\" style=\"width:750px;height:350px;\">You must enable Javascript to see the graph.</div>\n";
 	echo "<script type=\"text/javascript\">\n$(function () {\n";
@@ -258,6 +288,7 @@ echo "<h1>Eligius pool statistics <small>(version ".VERSION."!)</small></h1>\n";
 showIndividualInstructions();
 showPoolStatuses();
 showRecentBlocks();
+showPoolHashRate();
 showHashRateGraph();
 showTopContributors();
 showContributingInstructions();
