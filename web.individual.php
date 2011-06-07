@@ -91,16 +91,22 @@ var options = {
 
 $.get("$paidUri", "", function(data, textStatus, xhr) {
 	var alreadyPaid = data;
-	options.yaxis.min = data[0][1];
+	options.yaxis.min = data[EligiusUtils.findDataMin(data)][1];
 	series.push({ data: data, label: "Already paid", color: "#062270" });
 	$.plot($('#eligius_balance'), series, options);
 
 	$.get("$unpaidUri", "", function(data, textStatus, xhr) {
+		var unpaid = data;
 		series.push({ data: data, label: "Unpaid reward", color: "#6D89D5" });
 		$.plot($('#eligius_balance'), series, options);
 
 		$.get("$currentUri", "", function(data, textStatus, xhr) {
 			series.push({ data: data, label: "Current block estimate", color: "#FFE040" });
+			options.yaxis.max = data[EligiusUtils.findDataMax(data)][1] + alreadyPaid[alreadyPaid.length - 1][1] + unpaid[unpaid.length - 1][1];
+
+			options.yaxis.min = Math.max(0, options.yaxis.min - (options.yaxis.max - options.yaxis.min) * 0.05);
+			options.yaxis.max = options.yaxis.max + (options.yaxis.max - options.yaxis.min) * 0.10;
+
 			series.push({ data: EligiusUtils.shiftData(alreadyPaid, 1.0), label: "Payout threshold", color: "#FF0000", lines: { fill: false }, stack: false });
 			$.plot($('#eligius_balance'), series, options);
 		}, "json").error(function() {

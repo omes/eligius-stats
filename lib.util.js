@@ -88,3 +88,27 @@ EligiusUtils.shiftData = function(data, shiftAmount) {
 
 	return points;
 }
+
+EligiusUtils.findDataMin = function(data) {
+	var c = data.length;
+	var min = 0;
+	for(var i = 1; i < c; ++i) {
+		if(data[i][1] < data[min][1]) {
+			min = i;
+		}
+	}
+
+	return min;
+}
+
+EligiusUtils.findDataMax = function(data) {
+	var c = data.length;
+	var max = 0;
+	for(var i = 1; i < c; ++i) {
+		if(data[i][1] > data[max][1]) {
+			max = i;
+		}
+	}
+
+	return max;
+}
