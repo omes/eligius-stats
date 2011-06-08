@@ -206,11 +206,11 @@ function showPoolHashRate() {
 	foreach($SERVERS as $name => $data) {
 		list($pName, $apiRoot) = $data;
 
-		if(file_exists($f = $apiRoot.'/hashrate.txt')) {
+		if(file_exists($f = $apiRoot.'/hashrate.txt') && filemtime($f) >= time() - API_HASHRATE_DELAY) {
 			$rates[$pName] = prettyHashrate($rate = file_get_contents($f));
 			$total += $rate;
 		} else {
-			$rates[$pName] = 'N/A';
+			$rates[$pName] = '<small>N/A</small>';
 		}
 	}
 

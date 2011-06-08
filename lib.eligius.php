@@ -44,6 +44,8 @@ const STATUS_FILE_NAME = 'pool_status.json';
 const NUMBER_OF_RECENT_BLOCKS = 7;
 const NUMBER_OF_TOP_CONTRIBUTORS = 10;
 
+const API_HASHRATE_DELAY = 600; /* The hashrate.txt files seem to be updated every ten minutes. */
+
 require __DIR__.'/lib.util.php';
 require __DIR__.'/lib.cache.php';
 require __DIR__.'/inc.sql.php';
