@@ -112,3 +112,19 @@ EligiusUtils.findDataMax = function(data) {
 
 	return max;
 }
+
+EligiusUtils.splitHorizontalLine = function(data) {
+	var c = data.length;
+	var current = 0;
+	var points = [];
+	for(var i = 0; i < c; ++i) {
+		if(Math.abs(data[i][1] - data[current][1]) > 0.0000001) {
+			points.push(null);
+			current = i;
+		}
+
+		points.push(data[i]);
+	}
+
+	return points;
+}

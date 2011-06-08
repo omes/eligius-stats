@@ -107,7 +107,7 @@ $.get("$paidUri", "", function(data, textStatus, xhr) {
 			options.yaxis.min = Math.max(0, options.yaxis.min - (options.yaxis.max - options.yaxis.min) * 0.05);
 			options.yaxis.max = options.yaxis.max + (options.yaxis.max - options.yaxis.min) * 0.10;
 
-			series.push({ data: EligiusUtils.shiftData(alreadyPaid, 1.0), label: "Payout threshold", color: "#FF0000", lines: { fill: false }, stack: false });
+			series.push({ data: EligiusUtils.splitHorizontalLine(EligiusUtils.shiftData(alreadyPaid, 1.0)), label: "Payout threshold", color: "#FF0000", lines: { fill: false }, stack: false });
 			$.plot($('#eligius_balance'), series, options);
 		}, "json").error(function() {
 			$('#eligius_balance_errors').append('<p>An error happened while loading the "current block estimate" data.<br />Try reloading the page.</p>');
