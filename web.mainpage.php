@@ -67,28 +67,31 @@ function showPoolStatuses() {
 				if($latency < 1.0) {
 					$latency = "< 1s";
 				} else $latency = number_format($latency, 2).' s';
-			} else $latency = 'N/A';
+			} else $latency = '<small>N/A</small>';
 
 			if(isset($statuses[$serverName]['since'])) {
 				$uptime = time() - $statuses[$serverName]['since'];
 				$uptime = prettyDuration($uptime);
-				if($status !== S_WORKING) $uptime = 'Downtime : '.$uptime;
-			} else $uptime = 'N/A';
+				if($status !== S_WORKING) {
+					$uptime = 'Downtime : '.$uptime;
+					$latency = '<small>N/A</small>';
+				}
+			} else $uptime = '<small>N/A</small>';
 
 			if(isset($statuses[$serverName]['last-updated'])) {
 				$lastUpdated = $statuses[$serverName]['last-updated'];
 			}
 		} else {
-			$latency = 'N/A';
+			$latency = '<small>N/A</small>';
 			$status = S_UNKNOWN;
-			$uptime = 'N/A';
+			$uptime = '<small>N/A</small>';
 		}
 
 		if($status == S_UNKNOWN) {
 			$status = 'Unknown';
 			$color = '#FF6700';
 			$textColor = '#000000';
-			$uptime = 'N/A';
+			$uptime = '<small>N/A</small>';
 		} else if($status == S_WORKING) {
 			$status = 'Giving work, OK';
 			$color = '#93C572';
@@ -138,7 +141,7 @@ function showRecentBlocks() {
 				echo "<li><a href=\"http://blockexplorer.com/block/$block\">$block</a>, $interval ago</li>\n";
 			}
 		} else {
-			echo "<em>N/A</em>\n";
+			echo "<small>N/A</small>\n";
 		}
 
 		echo "</ul>\n</li>\n";
@@ -170,7 +173,7 @@ function showTopContributors() {
 
 			echo "<li class=\"rank$i\"><span><a href=\"./$server/$address\">$address</a> on $pServer with $hashrate on average</span></li>\n";
 		}
-	} else echo "N/A\n";
+	} else echo "<small>N/A</small>\n";
 
 	echo "</ul>\n";
 }
