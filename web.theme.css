@@ -56,6 +56,13 @@ div.errors > p {
 	background-color: #FFCCCC;
 }
 
+div.announcements > p {
+	margin-top: 0;
+	padding: 0.5em;
+	border: 2px solid #888800;
+	background-color: #FFFF00;
+}
+
 div.graph {
 	display: inline-block;
 	margin-left: 1em;

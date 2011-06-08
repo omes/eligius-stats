@@ -233,6 +233,8 @@ EOT;
 
 echo "<h1>$address on $prettyName</h1>\n";
 
+if(file_exists($f = __DIR__.'/inc.announcement.php')) require $f;
+
 showBalance($unpaid, $current);
 showHashrateAverage($server, $address);
 echo "<h2>Graphs</h2>\n";

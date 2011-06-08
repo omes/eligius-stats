@@ -284,6 +284,7 @@ echo <<<EOT
 EOT;
 echo "<h1>Eligius pool statistics <small>(version ".VERSION."!)</small></h1>\n";
 
+if(file_exists($f = __DIR__.'/inc.announcement.php')) require $f;
 
 showIndividualInstructions();
 showPoolStatuses();
