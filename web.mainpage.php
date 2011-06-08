@@ -153,7 +153,7 @@ function showRecentBlocks() {
 function showTopContributors() {
 	global $SERVERS;
 
-	echo "<h2>Top contributors</h2>\n<ul id=\"top_contrib\">\n";
+	echo "<h2>Top contributors</h2>\n<table id=\"top_contrib\">\n<thead>\n<tr><th>Rank</th><th>Server</th><th>Address</th><th>Average hashrate</th></tr></thead>\n<tbody>\n";
 
 	$success = null;
 	$top = cacheFetch('top_contributors', $success);
@@ -171,11 +171,11 @@ function showTopContributors() {
 			$address = str_pad($address, 34, '_', STR_PAD_RIGHT); /* Yes, this is a trick */
 			$address = str_replace('_', '&nbsp;', $address);
 
-			echo "<li class=\"rank$i\"><span><a href=\"./$server/$address\">$address</a> on $pServer with $hashrate on average</span></li>\n";
+			echo "<tr class=\"rank$i\"><td>$i</td><td>$pServer</td><td><a href=\"./$server/$address\">$address</a></td><td>$hashrate</td></tr>\n";
 		}
-	} else echo "<small>N/A</small>\n";
+	} else echo "<tr><td colspan=\"4\"><small>N/A</small></td></tr>\n";
 
-	echo "</ul>\n";
+	echo "</tbody>\n</table>\n";
 }
 
 function showContributingInstructions() {

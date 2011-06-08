@@ -18,6 +18,7 @@ strong.moremore {
 
 body > table {
 	border-collapse: collapse;
+	width: 750px;
 }
 
 body > table > thead > tr > th, body > table > tbody > tr > td {
@@ -36,15 +37,15 @@ ul#top_contrib > li.rank3 > span {
 	display: inline-block;
 }
 
-ul#top_contrib > li.rank1 > span {
+table#top_contrib > tbody > tr.rank1 {
 	background-color: #FFD700;
 }
 
-ul#top_contrib > li.rank2 > span {
+table#top_contrib > tbody > tr.rank2 {
 	background-color: #E5E4E2;
 }
 
-ul#top_contrib > li.rank3 > span {
+table#top_contrib > tbody > tr.rank3 {
 	background-color: #CD7F32;
 }
 
@@ -72,8 +73,4 @@ a[onclick] {
 	text-decoration: underline;
 	color: blue;
 	cursor: pointer;
-}
-
-table#pool_hashrate {
-	width: 750px;
 }
