@@ -275,19 +275,33 @@ function updateRandomAddress($serverName, $apiRoot) {
 function updateAverageHashrates() {
 	$end = time() - HASHRATE_LAG;
 	$start = $end - HASHRATE_AVERAGE;
-	$q = mysql_query("
-		SELECT username AS address, server, COUNT(*) AS shares
+	
+	$wStart = time() - HASHRATE_LAG - 60;
+	$isWorking = mysql_query("
+		SELECT COUNT(*) AS shares
 		FROM shares
 		WHERE our_result <> 'N'
-			AND time BETWEEN $start AND $end
-		GROUP BY server, username
-		ORDER BY time DESC
+			AND time >= $wStart
+		LIMIT 1
 	");
+	$isWorking = mysql_result($isWorking, 0, 0);
+	if($isWorking == 0) {
+		$averages = array();
+	} else {
+		$q = mysql_query("
+			SELECT username AS address, server, COUNT(*) AS shares
+			FROM shares
+			WHERE our_result <> 'N'
+				AND time BETWEEN $start AND $end
+			GROUP BY server, username
+			ORDER BY time DESC
+		");
 
-	$averages = array();
-	while($r = mysql_fetch_assoc($q)) {
-		$rate = floatval(bcdiv(bcmul($r['shares'], bcpow(2, 32)), HASHRATE_AVERAGE));
-		$averages[$r['server']][$r['address']] = array($r['shares'], $rate);
+		$averages = array();
+		while($r = mysql_fetch_assoc($q)) {
+			$rate = floatval(bcdiv(bcmul($r['shares'], bcpow(2, 32)), HASHRATE_AVERAGE));
+			$averages[$r['server']][$r['address']] = array($r['shares'], $rate);
+		}
 	}
 
 	return cacheStore('average_hashrates', $averages);

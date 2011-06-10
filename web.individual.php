@@ -55,7 +55,7 @@ function showHashrateAverage($server, $address) {
 	} else if($success) {
 		echo "<h2>Hashrate</h2>\n<p>This user has not submitted a share in the last three hours.</p>\n";
 	} else {
-		echo "<h2>Hashrate</h2>\n<p>The averages are not available at the moment. Try later !</p>\n";
+		echo "<h2>Hashrate</h2>\n<p>The averages are not available at the moment. <strong class=\"more\" style=\"color: darkred;\">The graphed data below may be wrong.</strong> Try later !</p>\n";
 	}
 }
 
