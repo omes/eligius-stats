@@ -116,10 +116,13 @@ function updateDataBulk($type, $identifier, $entries, $maxTimespan = null, $tryR
 			unset($data[$i]);
 			continue;
 		}
-		
-		// We have now only one point that's too far in the past. We move him right at the boundary, to avoid
-		// losing information.
-		$data[$i][0] = $threshold;
+
+		if($data[$i][0] < $threshold) {
+			// We have now only one point that's too far in the past. We move him right at the boundary, to avoid
+			// losing information.
+			$data[$i][0] = $threshold;
+		}
+
 		break;
 	}
 
