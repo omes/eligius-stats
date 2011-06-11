@@ -49,9 +49,8 @@ function showPoolStatuses() {
 
 	$f = __DIR__.'/'.DATA_RELATIVE_ROOT.'/'.STATUS_FILE_NAME;
 	if(file_exists($f)) {
-		$data = file_get_contents($f);
-		$statuses = json_decode($data, true);
-		if(($err = json_last_error()) !== JSON_ERROR_NONE) {
+		$statuses = json_decode_safe($f);
+		if($statuses === false) {
 			$statuses = array();
 		}
 	} else $statuses = array();

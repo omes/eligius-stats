@@ -21,70 +21,124 @@ const DATA_RELATIVE_ROOT = 'json';
 const DATA_SUFFIX = '.json';
 
 /**
- * Append a new value to a data file.
- * @param string $type the type of the data, one of the T_ constants.
- * @param string $identifier an unique identifier for this data (can be an address, or a pool name, …).
- * @param null|integer $date the date of the new data point. If null, current time is used.
- * @param float|string $value the value of the new data point.
- * @param integer $maxTimespan defines after how many seconds the data is considered obsolete and deleted.
- * @return bool true if the operation succeeded.
+ * This is a safe wrapper for json_decode.
+ * @param string $file filename, or raw JSON data
+ * @param bool $getFile if false, $file actually contains the raw data to be decoded.
+ * @return bool|mixed|string false if an error happened, or decoded JSON data.
  */
-function updateData($type, $identifier, $date = null, $value = null, $maxTimespan = null, $tryRepair = true) {
-	if($date === null) $date = microtime(true);
-	if($value === null) {
-		trigger_error('Null $value given.', E_USER_NOTICE);
+function json_decode_safe($file, $getFile = true) {
+	if($getFile) $data = file_get_contents($file);
+	else $data = $file;
+	$data = json_decode($data, true);
+	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
+		trigger_error('Call to json_decode('.($getFile ? $file : '').') failed : '.$err, E_USER_WARNING);
+		return false;
+	}
+	return $data;
+}
+
+/**
+ * This is a safe wrapper for json_encode.
+ * @param array $data the data to JSON-ize.
+ * @param null $toFile if not-null, the JSON will be written to this file instead of being returned.
+ * @return bool|string false if an error happened, or raw JSON data
+ */
+function json_encode_safe($data, $toFile = null) {
+	$json = json_encode($data);
+	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
+		trigger_error('Call to json_encode('.($toFile != null ? $toFile : '').') failed : '.$err, E_USER_WARNING);
 		return false;
 	}
 
-	$date = bcmul($date, 1000, 0);
+	if($toFile !== null) {
+		return file_put_contents($toFile, $json) !== false;
+	} else return $json;
+}
+
+/**
+ * Append new values to a data file.
+ * @param string $type the type of the data, one of the T_ constants.
+ * @param string $identifier an unique identifier for this data (can be an address, or a pool name, …).
+ * @param array $entries entries to add (array of array(date, value))
+ * @param integer $maxTimespan defines after how many seconds the data is considered obsolete and deleted.
+ * @param bool $tryRepair if true, will try to call tryRepairJson() on the file if it is corrupted.
+ * @return bool true if the operation succeeded.
+ */
+function updateDataBulk($type, $identifier, $entries, $maxTimespan = null, $tryRepair = true) {
+	if(count($entries) == 0) {
+		trigger_error('No entries given.', E_USER_NOTICE);
+		return false;
+	}
 
 	$file = __DIR__.'/'.DATA_RELATIVE_ROOT.'/'.$type.'_'.$identifier.DATA_SUFFIX;
-
 	if(file_exists($file)) {
-		$data = json_decode(file_get_contents($file), true);
-		if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-			if($tryRepair) {
-				tryRepairJson($file);
-				return updateData($type, $identifier, $date, $value, $maxTimespan, false);
-			}
-			trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
-			var_dump($file);
-			return false;
+		$data = json_decode_safe($file);
+		if($data === false) {
+			tryRepairJson($file);
+			return updateData($type, $identifier, $entries, $maxTimespan, false);
 		}
 	} else {
 		$data = array();
 	}
-
 	$c = count($data);
+
 	// Ensure chronological order
-	if($c >= 1 && $data[$c - 1][0] > $date) {
+	usort($entries, function($a, $b) { return $b[0] - $a[0]; });
+
+	foreach($entries as &$entry) {
+		$entry[0] *= 1000;
+	}
+
+	if($c >= 1 && $data[$c - 1][0] > $entries[0][0]) {
+		if($tryRepair) {
+			tryRepairJson($file);
+			return updateData($type, $identifier, $entries, $maxTimespan, false);
+		}
 		trigger_error('New data to be inserted must be newer than the latest point.', E_USER_WARNING);
 		return false;
 	}
-
-	$data[] = array((float)$date, (float)$value);
+	foreach($entries as $entry) {
+		$data[] = array((float)($entry[0]), (float)($entry[1]));
+	}
 
 	// Wipe out old values from the array
 	$threshold = bcmul(microtime(true) - $maxTimespan, 1000, 0);
 	for($i = 0; $i < $c; ++$i) {
-		if($data[$i][0] < $threshold) {
+		if($i < ($c - 1) && $data[$i][0] < $threshold && $data[$i + 1][0] < $threshold) {
 			unset($data[$i]);
-		} else break; // It's safe to break here, since we store the data in the chronological order.
+			continue;
+		}
+		
+		// We have now only one point that's too far in the past. We move him right at the boundary, to avoid
+		// losing information.
+		$data[$i][0] = $threshold;
+		break;
 	}
 
 	$data = array_values($data);
-	$json = json_encode($data);
-	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-		trigger_error('Call to json_encode failed : '.$err, E_USER_WARNING);
-		return false;
-	}
-
-	assert('strpos($json, "]]") !== false');
-	return file_put_contents($file, $json) !== false;
+	return json_encode_safe($data, $file);
 }
 
 /**
- * @param $file which file to repair
+ * Append a new value to a data file.
+ * @param string $type the type of the data, one of the T_ constants.
+ * @param string $identifier an unique identifier for this data (can be an address, or a pool name, …).
+ * @param null|int $date if null, current date is assumed
+ * @param float $value the value to insert
+ * @param integer $maxTimespan defines after how many seconds the data is considered obsolete and deleted.
+ * @param bool $tryRepair if true, will try to call tryRepairJson() on the file if it is corrupted.
+ * @return bool true if the operation succeeded.
+ */
+function updateData($type, $identifier, $date = null, $value = null, $maxTimespan = null, $tryRepair = true) {
+	if($date === null) $date = time();
+	$data = array(array($date, $value));
+
+	return updateDataBulk($type, $identifier, $data, $maxTimespan, $tryRepair);
+}
+
+/**
+ * Try to auto-correct corrupted or malformed JSON files.
+ * @param string $file which file to repair
  * @return bool true if an attempt was made to recover the JSON file.
  */
 function tryRepairJson($file) {
@@ -98,6 +152,33 @@ function tryRepairJson($file) {
 	if(strpos($contents, "]]]") !== false) {
 		$contents = str_replace("]]]", "]]", $contents);
 		return file_put_contents($file, $contents) !== false;
+	}
+
+	$data = json_decode_safe($contents, false);
+	$newData = array();
+	$hadError = false;
+	$previousDate = -1;
+	$now = time();
+	foreach($data as $d) {
+		if(count($d) == 2) {
+			if($d[0] < $previousDate) $hadError = true;
+			$previousDate = $d[0];
+
+			if($d[0] / 1000 > $now) {
+				$hadError = true;
+				continue;
+			}
+
+			$newData[] = $d;
+		}
+		else {
+			$hadError = true;
+		}
+	}
+	if($hadError) {
+		$newData = usort($newData, function($a, $b) { return $b[0] - $a[0]; });
+
+		return json_encode_safe($newData, $file);
 	}
 
 	trigger_error("Could not repair $file.", E_USER_WARNING);

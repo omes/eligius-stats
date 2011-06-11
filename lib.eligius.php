@@ -140,12 +140,7 @@ function updateAllBalancesOnServer($serverName, $apiRoot, $tickCallback = null) 
 	$failed = 0;
 
 	$balances = getBalanceData($apiRoot);
-	$latest = file_get_contents($apiRoot.'/blocks/latest.json');
-	$latest = json_decode($latest, true);
-	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-		trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
-		return false;
-	}
+	$latest = json_decode_safe($apiRoot.'/blocks/latest.json');
 
 	foreach($balances as $address => $data) {
 		$paid = isset($latest[$address]['everpaid']) ? satoshiToBTC($latest[$address]['everpaid']) : 0.0;
@@ -176,12 +171,7 @@ function updateServerStatus($serverName, $address, $port) {
 	if(!file_exists($f)) {
 		$status = array();
 	} else {
-		$data = file_get_contents($f);
-		$status = json_decode($data, true);
-		if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-			trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
-			return false;
-		}
+		$status = json_decode_safe($f);
 	}
 
 	$s = S_UNKNOWN;
@@ -196,12 +186,7 @@ function updateServerStatus($serverName, $address, $port) {
 		$status[$serverName]['since'] = $now;
 	}
 
-	$data = json_encode($status);
-	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-		trigger_error('Call to json_encode failed : '.$err, E_USER_WARNING);
-		return false;
-	}
-	return file_put_contents($f, $data) !== false;
+	return json_encode_safe($status, $f);
 }
 
 /**
@@ -343,17 +328,7 @@ function getBalanceData($apiRoot) {
 	if($cache === null) $cache = array();
 	if(isset($cache[$apiRoot])) return $cache[$apiRoot];
 
-	$f = file_get_contents($apiRoot.'/balances.json');
-	if($f === false) {
-		trigger_error('Cannot access balances.json.', E_USER_ERROR);
-		return false;
-	}
-
-	$balances = json_decode($f, true);
-	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-		trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
-		return false;
-	}
+	$balances = json_decode_safe($apiRoot.'/balances.json');
 
 	return $cache[$apiRoot] = $balances;
 }
@@ -412,12 +387,7 @@ function getServerStatus($server, $port, $timeout, &$status, &$latency) {
 		return false;
 	}
 
-	$work = json_decode(substr($resp, strpos($resp, '{') - 1), true);
-	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-		$status = S_INVALID_WORK;
-		trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
-		return false;
-	}
+	$work = json_decode_safe(substr($resp, strpos($resp, '{') - 1), false);
 	
 	if(!isset($work['result']['data']) || strlen($work['result']['data']) !== 256 || $work['error'] !== null) {
 		$status = S_INVALID_WORK;
@@ -436,12 +406,7 @@ function getServerStatus($server, $port, $timeout, &$status, &$latency) {
  */
 function getBalance($apiRoot, $address) {
 	$balances = getBalanceData($apiRoot);
-	$latest = file_get_contents($apiRoot.'/blocks/latest.json');
-	$latest = json_decode($latest, true);
-	if(($err = json_last_error()) !== JSON_ERROR_NONE) {
-		trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
-		return false;
-	}
+	$latest = json_decode_safe($apiRoot.'/blocks/latest.json');
 
 	if(!isset($balances[$address]['balance'])) return false;
 
