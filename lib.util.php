@@ -75,7 +75,7 @@ function updateDataBulk($type, $identifier, $entries, $maxTimespan = null, $tryR
 		$data = json_decode_safe($file);
 		if($data === false) {
 			tryRepairJson($file);
-			return updateData($type, $identifier, $entries, $maxTimespan, false);
+			return updateDataBulk($type, $identifier, $entries, $maxTimespan, false);
 		}
 	} else {
 		$data = array();
@@ -85,20 +85,16 @@ function updateDataBulk($type, $identifier, $entries, $maxTimespan = null, $tryR
 	// Ensure chronological order
 	usort($entries, function($a, $b) { return $b[0] - $a[0]; });
 
-	foreach($entries as &$entry) {
-		$entry[0] *= 1000;
-	}
-
-	if($c >= 1 && $data[$c - 1][0] > $entries[0][0]) {
+	if($c >= 1 && $data[$c - 1][0] > 1000 * $entries[0][0]) {
 		if($tryRepair) {
 			tryRepairJson($file);
-			return updateData($type, $identifier, $entries, $maxTimespan, false);
+			return updateDataBulk($type, $identifier, $entries, $maxTimespan, false);
 		}
 		trigger_error('New data to be inserted must be newer than the latest point.', E_USER_WARNING);
 		return false;
 	}
 	foreach($entries as $entry) {
-		$data[] = array((float)($entry[0]), (float)($entry[1]));
+		$data[] = array((float)(1000 * $entry[0]), (float)($entry[1]));
 	}
 
 	// Wipe out old values from the array

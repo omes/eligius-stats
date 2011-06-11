@@ -119,6 +119,7 @@ EligiusUtils.splitHorizontalLine = function(data) {
 	var points = [];
 	for(var i = 0; i < c; ++i) {
 		if(Math.abs(data[i][1] - data[current][1]) > 0.0000001) {
+			points.push([data[i][0] - 42, data[current][1]]);
 			points.push(null);
 			current = i;
 		}
