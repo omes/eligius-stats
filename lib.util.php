@@ -56,6 +56,18 @@ function json_encode_safe($data, $toFile = null) {
 }
 
 /**
+ * Truncate a data file (ie, delete all its contents).
+ * @param string $type the type of the data, one of the T_ constants.
+ * @param string $identifier an unique identifier for this data (can be an address, or a pool name, …).
+ * @return bool true if the operation succeeded
+ */
+function truncateData($type, $identifier) {
+	$file = __DIR__.'/'.DATA_RELATIVE_ROOT.'/'.$type.'_'.$identifier.DATA_SUFFIX;
+	if(file_exists($file)) return unlink($file);
+	else return true;
+}
+
+/**
  * Append new values to a data file.
  * @param string $type the type of the data, one of the T_ constants.
  * @param string $identifier an unique identifier for this data (can be an address, or a pool name, …).
@@ -83,7 +95,7 @@ function updateDataBulk($type, $identifier, $entries, $maxTimespan = null, $tryR
 	$c = count($data);
 
 	// Ensure chronological order
-	usort($entries, function($a, $b) { return $b[0] - $a[0]; });
+	usort($entries, function($a, $b) { return $a[0] - $b[0]; });
 
 	if($c >= 1 && $data[$c - 1][0] > 1000 * $entries[0][0]) {
 		if($tryRepair) {

@@ -24,6 +24,8 @@ require __DIR__.'/inc.servers.php';
 foreach($SERVERS as $name => $data) {
 	list(,$apiRoot) = $data;
 
+	$toCommit = array();
+
 	$gBlocks = glob($apiRoot.'/blocks/0000*.json');
 	$blocks = array();
 	foreach($gBlocks as $block) {
@@ -36,15 +38,18 @@ foreach($SERVERS as $name => $data) {
 		$blk = json_decode($blk, true);
 
 		foreach($blk as $address => $addressData) {
-			if(isset($addressData['balance'])) {
-				updateData(T_BALANCE_UNPAID_REWARD, $name.'_'.$address, $foundAt, satoshiToBTC($addressData['balance']), TIMESPAN_SHORT);
-			}
-			if(isset($addressData['everpaid'])) {
-				updateData(T_BALANCE_ALREADY_PAID, $name.'_'.$address, $foundAt, satoshiToBTC($addressData['everpaid']), TIMESPAN_SHORT);
-			}
+			$toCommit[T_BALANCE_UNPAID_REWARD][$address][] = array($foundAt, (isset($addressData['balance']) ? satoshiToBTC($addressData['balance']) : "0.0"));
+			$toCommit[T_BALANCE_ALREADY_PAID][$address][] = array($foundAt, (isset($addressData['everpaid']) ? satoshiToBTC($addressData['everpaid']) : "0.0"));
 		}
 
 		echo '.';
+	}
+
+	foreach($toCommit as $type => $kzk) {
+		foreach($kzk as $address => $entries) {
+			truncateData($type, $F = $name.'_'.$address);
+			updateDataBulk($type, $F, $entries, TIMESPAN_SHORT);
+		}
 	}
 
 	echo "\n";
