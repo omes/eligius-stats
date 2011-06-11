@@ -29,7 +29,7 @@ const DATA_SUFFIX = '.json';
  * @param integer $maxTimespan defines after how many seconds the data is considered obsolete and deleted.
  * @return bool true if the operation succeeded.
  */
-function updateData($type, $identifier, $date = null, $value = null, $maxTimespan = null) {
+function updateData($type, $identifier, $date = null, $value = null, $maxTimespan = null, $tryRepair = true) {
 	if($date === null) $date = microtime(true);
 	if($value === null) {
 		trigger_error('Null $value given.', E_USER_NOTICE);
@@ -43,7 +43,12 @@ function updateData($type, $identifier, $date = null, $value = null, $maxTimespa
 	if(file_exists($file)) {
 		$data = json_decode(file_get_contents($file), true);
 		if(($err = json_last_error()) !== JSON_ERROR_NONE) {
+			if($tryRepair) {
+				tryRepairJson($file);
+				return updateData($type, $identifier, $date, $value, $maxTimespan, false);
+			}
 			trigger_error('Call to json_decode failed : '.$err, E_USER_WARNING);
+			var_dump($file);
 			return false;
 		}
 	} else {
@@ -74,7 +79,29 @@ function updateData($type, $identifier, $date = null, $value = null, $maxTimespa
 		return false;
 	}
 
+	assert('strpos($json, "]]") !== false');
 	return file_put_contents($file, $json) !== false;
+}
+
+/**
+ * @param $file which file to repair
+ * @return bool true if an attempt was made to recover the JSON file.
+ */
+function tryRepairJson($file) {
+	$contents = file_get_contents($file);
+	if(strpos($contents, "]]") === false && strlen($contents) > 1) {
+		$lastBracket = strrpos($contents, ',[');
+		$contents = substr($contents, 0, $lastBracket).']';
+		return file_put_contents($file, $contents) !== false;
+	}
+
+	if(strpos($contents, "]]]") !== false) {
+		$contents = str_replace("]]]", "]]", $contents);
+		return file_put_contents($file, $contents) !== false;
+	}
+
+	trigger_error("Could not repair $file.", E_USER_WARNING);
+	return false;
 }
 
 /**
