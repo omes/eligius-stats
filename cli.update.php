@@ -70,11 +70,11 @@ $commands = array(
 		return $r;
 	},
 
-	'recent_blocks' => function() use($SERVERS) {
+	'blocks' => function() use($SERVERS) {
 		$r = true;
 		foreach($SERVERS as $serverName => $data) {
 			list(, $apiRoot) = $data;
-			$r = $r && updateRecentBlocks($serverName, $apiRoot);
+			$r = $r && updateBlocks($serverName, $apiRoot);
 		}
 		return $r;
 	},

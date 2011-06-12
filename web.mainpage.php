@@ -124,29 +124,41 @@ function showRecentBlocks() {
 	global $SERVERS;
 
 	echo "<h2>Recently found blocks</h2>\n";
-	echo "<ul>\n";
 	$now = time();
 
+	echo "<table id=\"rfb\">\n<thead>\n<tr><th>▼ When</th><th>Server</th><th>Block</th><th>Round duration</th><th>Shares</th></tr>\n</thead>\n<tbody>\n";
+
+	$recent = array();
+	$success = true;
 	foreach($SERVERS as $name => $data) {
-		list($prettyName,) = $data;
-		echo "<li>By $prettyName :\n<ul>\n";
-
-		$success = null;
-		$recent = cacheFetch('recent_blocks_'.$name, $success);
-		if($success) {
-			foreach($recent as $file => $modificationTime) {
-				$interval = prettyDuration($now - $modificationTime, true);
-				$block = pathinfo($file, PATHINFO_FILENAME);
-				echo "<li><a href=\"http://blockexplorer.com/block/$block\">$block</a>, $interval ago</li>\n";
-			}
-		} else {
-			echo "<small>N/A</small>\n";
+		$k = cacheFetch('blocks_recent_'.$name, $s);
+		foreach($k as $a) {
+			$a['server'] = $name;
+			$recent[] = $a;
 		}
-
-		echo "</ul>\n</li>\n";
+		$success = $success && $s;
 	}
 
-	echo "</ul>\n";
+	if(!$success) {
+		echo "<tr><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
+	} else {
+		$cb = function($a, $b) { return $b['when'] - $a['when']; }; /* Sort in reverse order */
+		usort($recent, $cb);
+
+		$a = 0;
+		foreach($recent as $r) {
+			$a = ($a + 1) % 2;
+
+			$when = prettyDuration($now - $r['when']).' ago';
+			$shares = prettyInt($r['shares_total']);
+			$server = $SERVERS[$r['server']][0];
+			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'">'.strtoupper($r['hash']).'</a>';
+			$duration = prettyDuration($r['duration']);
+			echo "<tr class=\"row$a\"><td>$when</td><td>$server</td><td>$block</td><td>$duration</td><td>$shares</td></tr>\n";
+		}
+	}
+
+	echo "</tbody>\n</table>\n";
 }
 
 function showTopContributors() {
@@ -164,11 +176,9 @@ function showTopContributors() {
 			$hashrate = $t['hashrate'];
 			$address = $t['address'];
 			$server = $t['server'];
-			
+
 			$hashrate = prettyHashrate($hashrate);
 			$pServer = $SERVERS[$server][0];
-			$address = str_pad($address, 34, '_', STR_PAD_RIGHT); /* Yes, this is a trick */
-			$address = str_replace('_', '&nbsp;', $address);
 
 			echo "<tr class=\"rank$i\"><td>$i</td><td>$pServer</td><td><a href=\"./$server/$address\">$address</a></td><td>$hashrate</td></tr>\n";
 		}
@@ -290,9 +300,9 @@ if(file_exists($f = __DIR__.'/inc.announcement.php')) require $f;
 
 showIndividualInstructions();
 showPoolStatuses();
-showRecentBlocks();
 showPoolHashRate();
 showHashRateGraph();
+showRecentBlocks();
 showTopContributors();
 showContributingInstructions();
 
@@ -301,4 +311,3 @@ if(file_exists(__DIR__.'/inc.analytics.php')) {
 }
 
 echo "</body>\n</html>\n";
-die;

@@ -49,6 +49,9 @@ const NUMBER_OF_TOP_CONTRIBUTORS = 10;
 
 const API_HASHRATE_DELAY = 600; /* The hashrate.txt files seem to be updated every ten minutes. */
 
+const RECENT_BLOCKS = 10;
+const OLD_BLOCKS = 250;
+
 require __DIR__.'/lib.util.php';
 require __DIR__.'/lib.cache.php';
 require __DIR__.'/inc.sql.php';
@@ -193,28 +196,6 @@ function updateServerStatus($serverName, $address, $port) {
 }
 
 /**
- * Cache a list of blocks recently found by a server.
- * @param string $serverName the name of the server
- * @param string $apiRoot the API root for this server
- * @param int $numBlocks number of blocks to fetch
- * @return bool whether the operation was successful or not
- */
-function updateRecentBlocks($serverName, $apiRoot, $numBlocks = NUMBER_OF_RECENT_BLOCKS) {
-	$blocks = glob($apiRoot.'/blocks/0000*.json');
-	if($blocks === false) return false;
-	$foundAt = array();
-	foreach($blocks as $block) {
-		$foundAt[$block] = filemtime($block);
-	}
-
-	asort($foundAt);
-
-	$recent = array_slice($foundAt, -$numBlocks, $numBlocks, true);
-	$recent = array_reverse($recent, true);
-	return cacheStore('recent_blocks_'.$serverName, $recent);
-}
-
-/**
  * Cache the contributors with the highest average hashrate, in average.
  * @param int $numContributors how many top contributors to fetch
  * @return bool true if the operation was successful.
@@ -313,6 +294,83 @@ function updateAverageHashrates() {
 	$b = cacheStore('average_hashrates_short', $averages15min);
 
 	return $a && $b;
+}
+
+function updateBlocks($server, $apiRoot) {
+	$recent = cacheFetch('blocks_recent_'.$server, $success0);
+	$old = cacheFetch('blocks_old_'.$server, $success1);
+	if(!$success0) {
+		$recent = array();
+	}
+	if(!$success1) {
+		$old = array();
+	}
+
+	$gBlocks = glob($apiRoot.'/blocks/0000*.json');
+	$blocks = array();
+	foreach($gBlocks as $block) {
+		$blocks[$block] = filemtime($block);
+	}
+	arsort($blocks);
+
+	$foundAt = array_values($blocks);
+	$blocks = array_keys($blocks);
+
+	$c = count($blocks);
+	$newBlocks = array();
+
+	for($i = 0; $i < ($c - 1); ++$i) {
+		$blk = pathinfo($blocks[$i], PATHINFO_FILENAME);
+		if(count($recent) > 0 && $recent[0]['when'] >= $foundAt[$i]) break;
+
+		$bData = array();
+
+		$bData['hash'] = $blk;
+		$bData['when'] = $foundAt[$i];
+		$bData['duration'] = $foundAt[$i] - $foundAt[$i + 1];
+
+		$start = $foundAt[$i + 1];
+		$end = $foundAt[$i];
+		$q = mysql_query("
+			SELECT username, COUNT(*) AS fshares
+			FROM shares
+			WHERE our_result <> 'N'
+				AND server = '$server'
+				AND time BETWEEN $start AND $end
+			GROUP BY username
+		");
+
+		$bData['shares_total'] = 0;
+		while($r = mysql_fetch_assoc($q)) {
+			$bData['shares_total'] += $r['fshares'];
+			$bData['shares'][$r['username']] = $r['fshares'];
+		}
+
+		$json = json_decode(file_get_contents($blocks[$i]), true);
+		foreach($json as $address => $row) {
+			if(isset($row['earned'])) {
+				$bData['rewards'][$address] = satoshiToBTC($row['earned']);
+			}
+		}
+
+		$newBlocks[] = $bData;
+	}
+
+	$recent = array_merge($newBlocks, $recent);
+
+	// Transfer overflowing blocks from $recent to $old
+	$c = count($recent);
+	for($i = RECENT_BLOCKS; $i < $c; ++$i) {
+		array_unshift($old, array_pop($recent));
+	}
+
+	// Throw away very old blocks
+	$c = count($old);
+	for($i = OLD_BLOCKS; $i < $c; ++$i) {
+		array_pop($old);
+	}
+
+	return cacheStore('blocks_recent_'.$server, $recent) && cacheStore('blocks_old_'.$server, $old);
 }
 
 /**

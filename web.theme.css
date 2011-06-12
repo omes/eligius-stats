@@ -3,6 +3,14 @@ body {
 	font-size: 0.9em;
 }
 
+tr.row0 > td {
+	background-color: #E8E8E8;
+}
+
+tr.row1 > td {
+	background-color: #F8F8F8;
+}
+
 small {
 	font-size: 0.8em;
 	color: #999;
@@ -77,4 +85,13 @@ a[onclick] {
 
 td.warn {
 	background-color: #FF6700;
+}
+
+table#rfb {
+	width: 110em;
+}
+
+body > table#rfb > thead > tr > th, body > table > tbody > tr > td {
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
 }

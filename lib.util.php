@@ -268,3 +268,12 @@ function extractColor($seed) {
 	if($r + $g + $b < $threshold || $r + $g + $b > (3*255 - $threshold)) return extractColor($d);
 	else return "rgb($r, $g, $b)";
 }
+
+/**
+ * Neatly formats a (large) integer.
+ * @param integer $i integer to format
+ * @return string the formatted integer
+ */
+function prettyInt($i) {
+	return number_format($i, 0, '.', ',');
+}
