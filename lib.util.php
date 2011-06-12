@@ -283,3 +283,31 @@ function extractColor($seed) {
 function prettyInt($i) {
 	return number_format($i, 0, '.', ',');
 }
+
+/**
+ * Get the formatted number of seconds, minutes and hours from a duration.
+ * @param integer $d the duration (number of seconds)
+ * @return array array($seconds, $minutes, $hours)
+ */
+function extractTime($d) {
+	$seconds = $d % 60;
+	$minutes = (($d - $seconds) / 60) % 60;
+	$hours = ($d - 60 * $minutes - $seconds) / 3600;
+	if($seconds) {
+		$seconds .= 's';
+	} else $seconds = '';
+	if($minutes) {
+		$minutes .= 'm';
+	} else $minutes = '';
+	if($hours) {
+		$hours .= 'h';
+	} else $hours = '';
+	if($hours && $minutes == '') {
+		$minutes = '0m';
+	}
+	if(($hours || $minutes) && $seconds == '') {
+		$seconds = '0s';
+	}
+
+	return array($seconds, $minutes, $hours);
+}

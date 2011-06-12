@@ -159,25 +159,7 @@ function showRecentBlocks() {
 			$server = $SERVERS[$r['server']][0];
 			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -25).'</a>';
 
-			$seconds = $r['duration'] % 60;
-			$minutes = (($r['duration'] - $seconds) / 60) % 60;
-			$hours = ($r['duration'] - 60 * $minutes - $seconds) / 3600;
-			if($seconds) {
-				$seconds .= 's';
-			} else $seconds = '';
-			if($minutes) {
-				$minutes .= 'm';
-			} else $minutes = '';
-			if($hours) {
-				$hours .= 'h';
-			} else $hours = '';
-
-			if($hours && $minutes == '') {
-				$minutes = '0m';
-			}
-			if(($hours || $minutes) && $seconds == '') {
-				$seconds = '0s';
-			}
+			list($seconds, $minutes, $hours) = extractTime($r['duration']);
 
 			$c = $colors[$r['server']];
 
