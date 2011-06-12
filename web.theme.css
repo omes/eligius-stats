@@ -11,6 +11,10 @@ tr.row1 > td {
 	background-color: #F8F8F8;
 }
 
+td.ralign {
+	text-align: right;
+}
+
 small {
 	font-size: 0.8em;
 	color: #999;
@@ -85,10 +89,6 @@ a[onclick] {
 
 td.warn {
 	background-color: #FF6700;
-}
-
-table#rfb {
-	width: 80em;
 }
 
 body > table#rfb > thead > tr > th, body > table > tbody > tr > td {

@@ -211,7 +211,7 @@ function satoshiToBTC($satoshi) {
  * @param bool $align whether we should align the components.
  * @return string a human-readable version of the same duration
  */
-function prettyDuration($duration, $align = false) {
+function prettyDuration($duration, $align = false, $precision = 4) {
 	if($duration < 60) return "a few seconds";
 	else if($duration < 300) return "a few minutes";
 
@@ -221,7 +221,7 @@ function prettyDuration($duration, $align = false) {
 	foreach($units as $u => $d) {
 		$num = floor($duration / $d);
 		if($num >= 1) {
-			$plural = ($num > 1 ? 's' : '');
+			$plural = ($num > 1 ? 's' : ($align ? '&nbsp;' : ''));
 			if($align && count($r) > 0) {
 				$num = str_pad($num, 2, '_', STR_PAD_LEFT);
 				$num = str_replace('_', '&nbsp;', $num);
@@ -231,11 +231,17 @@ function prettyDuration($duration, $align = false) {
 		}
 	}
 
+	$prefix = '';
+	while(count($r) > $precision) {
+		$prefix = 'about ';
+		array_pop($r);
+	}
+
 	if(count($r) > 1) {
 		$ret = array_pop($r);
 		$ret = implode(', ', $r).' and '.$ret;
-		return $ret;
-	} else return $r[0];
+		return $prefix.$ret;
+	} else return $prefix.$r[0];
 }
 
 /**

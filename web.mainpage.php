@@ -126,9 +126,10 @@ function showRecentBlocks() {
 	echo "<h2>Recently found blocks</h2>\n";
 	$now = time();
 
-	echo "<table id=\"rfb\">\n<thead>\n<tr><th>▼ When</th><th>Server</th><th>Block</th><th>Round duration</th><th>Shares</th></tr>\n</thead>\n<tbody>\n";
+	echo "<table id=\"rfb\">\n<thead>\n<tr><th>▼ When</th><th>Server</th><th colspan=\"3\">Round duration</th><th>Shares</th><th>Block</th></tr>\n</thead>\n<tbody>\n";
 
 	$recent = array();
+	$colors = array();
 	$success = true;
 	foreach($SERVERS as $name => $data) {
 		$k = cacheFetch('blocks_recent_'.$name, $s);
@@ -137,10 +138,12 @@ function showRecentBlocks() {
 			$recent[] = $a;
 		}
 		$success = $success && $s;
+
+		$colors[$name] = extractColor($data[0]);
 	}
 
 	if(!$success) {
-		echo "<tr><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
+		echo "<tr><td><small>N/A</small></td><td><small>N/A</small></td><td colspan=\"3\"><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
 	} else {
 		$cb = function($a, $b) { return $b['when'] - $a['when']; }; /* Sort in reverse order */
 		usort($recent, $cb);
@@ -151,12 +154,34 @@ function showRecentBlocks() {
 
 			$hash = strtoupper($r['hash']);
 
-			$when = prettyDuration($now - $r['when']).' ago';
+			$when = prettyDuration($now - $r['when'], false, 1).' ago';
 			$shares = prettyInt($r['shares_total']);
 			$server = $SERVERS[$r['server']][0];
-			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -15).'</a>';
-			$duration = prettyDuration($r['duration']);
-			echo "<tr class=\"row$a\"><td>$when</td><td>$server</td><td>$block</td><td>$duration</td><td>$shares</td></tr>\n";
+			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -25).'</a>';
+
+			$seconds = $r['duration'] % 60;
+			$minutes = (($r['duration'] - $seconds) / 60) % 60;
+			$hours = ($r['duration'] - 60 * $minutes - $seconds) / 3600;
+			if($seconds) {
+				$seconds .= 's';
+			} else $seconds = '';
+			if($minutes) {
+				$minutes .= 'm';
+			} else $minutes = '';
+			if($hours) {
+				$hours .= 'h';
+			} else $hours = '';
+
+			if($hours && $minutes == '') {
+				$minutes = '0m';
+			}
+			if(($hours || $minutes) && $seconds == '') {
+				$seconds = '0s';
+			}
+
+			$c = $colors[$r['server']];
+
+			echo "<tr class=\"row$a\"><td>$when</td><td style=\"background-color: $c;\">$server</td><td class=\"ralign\" style=\"width: 1.5em;\">$hours</td><td class=\"ralign\" style=\"width: 1.5em;\">$minutes</td><td class=\"ralign\" style=\"width: 1.5em;\">$seconds</td><td class=\"ralign\">$shares</td><td class=\"ralign\">$block</td></tr>\n";
 		}
 	}
 
