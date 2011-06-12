@@ -110,7 +110,7 @@ function updateDataBulk($type, $identifier, $entries, $maxTimespan = null, $tryR
 	}
 
 	// Wipe out old values from the array
-	$threshold = bcmul(microtime(true) - $maxTimespan, 1000, 0);
+	$threshold = bcmul(time() - $maxTimespan, 1000, 0);
 	for($i = 0; $i < $c; ++$i) {
 		if($i < ($c - 1) && $data[$i][0] < $threshold && $data[$i + 1][0] < $threshold) {
 			unset($data[$i]);

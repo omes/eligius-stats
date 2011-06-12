@@ -26,6 +26,8 @@ const INTERVAL = HASHRATE_PERIOD_LONG;
 foreach($SERVERS as $name => $data) {
 	$now = time();
 	$current = $now - TIMESPAN_LONG + 42;
+
+	$rates = array();
 	while($current < $now - INTERVAL) {
 		$start = $current;
 		$end = $current + INTERVAL;
@@ -40,11 +42,14 @@ foreach($SERVERS as $name => $data) {
 		$hashrate = mysql_fetch_assoc($hashrate);
 		$hashrate = $hashrate['hashrate'];
 
-		updateData(T_HASHRATE_POOL, $name, $current, $hashrate, TIMESPAN_LONG);
+		$rates[] = array($current, $hashrate);
 
 		$current += INTERVAL;
 		echo '.';
 	}
+
+	truncateData(T_HASHRATE_POOL, $name);
+	updateDataBulk(T_HASHRATE_POOL, $name, $rates, TIMESPAN_LONG);
 
 	echo "\n";
 }

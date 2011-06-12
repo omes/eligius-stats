@@ -30,6 +30,8 @@ foreach($SERVERS as $name => $data) {
 	list(, $apiRoot) = $data;
 	$addresses = getActiveAddresses($apiRoot);
 
+	$rates = array();
+
 	while($current < $now - INTERVAL) {
 		$start = $current;
 		$end = $current + INTERVAL;
@@ -52,12 +54,16 @@ foreach($SERVERS as $name => $data) {
 		
 		foreach($addresses as $address) {
 			$hashrate = isset($row[$address]) ? $row[$address] : 0;
-
-			updateData(T_HASHRATE_INDIVIDUAL, $name.'_'.$address, $current, $hashrate, TIMESPAN_SHORT);
+			$rates[$address][] = array($current, $hashrate);
 		}
 
 		$current += INTERVAL;
 		echo '.';
+	}
+	
+	foreach($rates as $address => $entries) {
+		truncateData(T_HASHRATE_INDIVIDUAL, $F = $name.'_'.$address);
+		updateDataBulk(T_HASHRATE_INDIVIDUAL, $F, $entries, TIMESPAN_SHORT);
 	}
 
 	echo "\n";

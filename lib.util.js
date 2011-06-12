@@ -49,6 +49,12 @@ EligiusUtils.movingAverage = function(data, window, interval) {
 	var c = data.length;
 	if(c == 0) return points;
 
+	for(var Z = 0; Z < c; ++Z) {
+		data[Z][0] = parseInt(data[Z][0]);
+	}
+	window = parseInt(window);
+	interval = parseInt(interval);
+
 	var start = data[0][0];
 	var stop = start + window;
 	var sum, i;
