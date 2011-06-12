@@ -45,17 +45,35 @@ EOT;
 }
 
 function showHashrateAverage($server, $address) {
-	$success = null;
-	$averages = cacheFetch('average_hashrates', $success);
+	$averages_long = cacheFetch('average_hashrates_long', $success0);
+	$averages_short = cacheFetch('average_hashrates_short', $success1);
 
-	if($success && isset($averages[$server][$address]) && $averages[$server][$address] > 0) {
-		list($shares, $rate) = $averages[$server][$address];
-		$rate = prettyHashrate($rate);
-		echo "<h2>Hashrate</h2>\n<p>This user is contributing to the pool by doing, in average, <strong class=\"moremore\">$rate</strong> (<strong>$shares</strong> shares submitted in the last 3 hours). This is an average, and may or may not reflect your real hashrate, depending on luck.</p>\n";
-	} else if($success && count($averages) > 0) {
-		echo "<h2>Hashrate</h2>\n<p>This user has not submitted a share in the last three hours.</p>\n";
+	echo "<h2>Hashrates</h2>\n<table>\n<thead><tr><th></th><th>".HASHRATE_AVERAGE_HR." average</th><th>".HASHRATE_AVERAGE_SHORT_HR." average</th></tr>\n</thead>\n<tbody>\n";
+
+	if(!$success0 || !$success1 || count($averages_short) == 0) {
+		echo "<tr><td>Hashrate</td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
+		echo "<tr><td>Submitted shares</td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
+		$error = "<p>The averages are not available at the moment. <strong class=\"more\">The graphed data below may be wrong.</strong> Try later !</p>\n";
 	} else {
-		echo "<h2>Hashrate</h2>\n<p>The averages are not available at the moment. <strong class=\"more\" style=\"color: darkred;\">The graphed data below may be wrong.</strong> Try later !</p>\n";
+		$short = isset($averages_short[$server][$address]) ? prettyHashrate($averages_short[$server][$address][1]) : prettyHashrate(0);
+		$long = isset($averages_long[$server][$address]) ? prettyHashrate($averages_long[$server][$address][1]) : prettyHashrate(0);
+		$sharesShort = isset($averages_short[$server][$address]) ? $averages_short[$server][$address][0] : 0;
+		$sharesLong = isset($averages_long[$server][$address]) ? $averages_long[$server][$address][0] : 0;
+		if($sharesShort == 0) {
+			$sClass = ' class="warn"';
+		} else $sClass = '';
+		if($sharesLong == 0) {
+			$lClass = ' class="warn"';
+		} else $lClass = '';
+
+		echo "<tr><td>Hashrate</td><td$lClass><strong class=\"moremore\">$long</strong></td><td$sClass>$short</td></tr>\n";
+		echo "<tr><td>Submitted shares</td><td$lClass>$sharesLong</td><td$sClass>$sharesShort</td></tr>\n";
+	}
+
+	echo "</tbody>\n</table>\n";
+
+	if(isset($error)) {
+		echo "<div class=\"errors\">$error</div>\n";
 	}
 }
 

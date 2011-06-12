@@ -26,6 +26,9 @@ const T_HASHRATE_INDIVIDUAL = 'hashrate';
 const T_HASHRATE_POOL = 'hashrate_total';
 
 const HASHRATE_AVERAGE = 10800; // Show a 3-hour average for individual stats
+const HASHRATE_AVERAGE_HR = '3 hour'; // Show a 3-hour average for individual stats
+const HASHRATE_AVERAGE_SHORT = 900;
+const HASHRATE_AVERAGE_SHORT_HR = '15 minute';
 const HASHRATE_PERIOD = 900; // Use a 15-minute average to compute the hashrate
 const HASHRATE_PERIOD_LONG = 3600;
 const HASHRATE_LAG = 180; // Use a 3-minute delay, to cope with MySQL replication lag
@@ -271,7 +274,8 @@ function updateAverageHashrates() {
 	");
 	$isWorking = mysql_result($isWorking, 0, 0);
 	if($isWorking == 0) {
-		$averages = array();
+		$averages3h = array();
+		$averages15min = array();
 	} else {
 		$q = mysql_query("
 			SELECT username AS address, server, COUNT(*) AS shares
@@ -282,14 +286,33 @@ function updateAverageHashrates() {
 			ORDER BY time DESC
 		");
 
-		$averages = array();
+		$averages3h = array();
 		while($r = mysql_fetch_assoc($q)) {
 			$rate = floatval(bcdiv(bcmul($r['shares'], bcpow(2, 32)), HASHRATE_AVERAGE));
-			$averages[$r['server']][$r['address']] = array($r['shares'], $rate);
+			$averages3h[$r['server']][$r['address']] = array($r['shares'], $rate);
+		}
+
+		$start = $end - HASHRATE_AVERAGE_SHORT;
+		$q = mysql_query("
+			SELECT username AS address, server, COUNT(*) AS shares
+			FROM shares
+			WHERE our_result <> 'N'
+				AND time BETWEEN $start AND $end
+			GROUP BY server, username
+			ORDER BY time DESC
+		");
+
+		$averages15min = array();
+		while($r = mysql_fetch_assoc($q)) {
+			$rate = floatval(bcdiv(bcmul($r['shares'], bcpow(2, 32)), HASHRATE_AVERAGE_SHORT));
+			$averages15min[$r['server']][$r['address']] = array($r['shares'], $rate);
 		}
 	}
 
-	return cacheStore('average_hashrates', $averages);
+	$a = cacheStore('average_hashrates_long', $averages3h);
+	$b = cacheStore('average_hashrates_short', $averages15min);
+
+	return $a && $b;
 }
 
 /**
