@@ -88,7 +88,7 @@ td.warn {
 }
 
 table#rfb {
-	width: 110em;
+	width: 80em;
 }
 
 body > table#rfb > thead > tr > th, body > table > tbody > tr > td {

@@ -149,10 +149,12 @@ function showRecentBlocks() {
 		foreach($recent as $r) {
 			$a = ($a + 1) % 2;
 
+			$hash = strtoupper($r['hash']);
+
 			$when = prettyDuration($now - $r['when']).' ago';
 			$shares = prettyInt($r['shares_total']);
 			$server = $SERVERS[$r['server']][0];
-			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'">'.strtoupper($r['hash']).'</a>';
+			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -15).'</a>';
 			$duration = prettyDuration($r['duration']);
 			echo "<tr class=\"row$a\"><td>$when</td><td>$server</td><td>$block</td><td>$duration</td><td>$shares</td></tr>\n";
 		}
