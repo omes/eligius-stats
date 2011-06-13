@@ -126,7 +126,7 @@ function showRecentBlocks() {
 	echo "<h2>Recently found blocks</h2>\n";
 	$now = time();
 
-	echo "<table id=\"rfb\">\n<thead>\n<tr><th>▼ When</th><th>Server</th><th colspan=\"3\">Round duration</th><th>Shares</th><th>Block</th></tr>\n</thead>\n<tbody>\n";
+	echo "<table id=\"rfb\">\n<thead>\n<tr><th>▼ When</th><th>Server</th><th colspan=\"3\">Round duration</th><th>Shares</th><th>Status</th><th>Block</th></tr>\n</thead>\n<tbody>\n";
 
 	$recent = array();
 	$colors = array();
@@ -143,7 +143,7 @@ function showRecentBlocks() {
 	}
 
 	if(!$success) {
-		echo "<tr><td><small>N/A</small></td><td><small>N/A</small></td><td colspan=\"3\"><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
+		echo "<tr><td><small>N/A</small></td><td><small>N/A</small></td><td colspan=\"3\"><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
 	} else {
 		$cb = function($a, $b) { return $b['when'] - $a['when']; }; /* Sort in reverse order */
 		usort($recent, $cb);
@@ -159,11 +159,24 @@ function showRecentBlocks() {
 			$server = $SERVERS[$r['server']][0];
 			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -25).'</a>';
 
-			list($seconds, $minutes, $hours) = extractTime($r['duration']);
+			if(isset($r['valid']) && $r['valid'] === true) {
+				$status = '<td>Valid</td>';
+			} else if(isset($r['valid']) && $r['valid'] === false) {
+				$status = '<td class="warn">Invalid</td>';
+			} else {
+				$status = '<td><small>Unknown</small></td>';
+			}
+
+			if(isset($r['duration'])) {
+				list($seconds, $minutes, $hours) = extractTime($r['duration']);
+				$duration = "<td class=\"ralign\" style=\"width: 1.5em;\">$hours</td><td class=\"ralign\" style=\"width: 1.5em;\">$minutes</td><td class=\"ralign\" style=\"width: 1.5em;\">$seconds</td>";
+			} else {
+				$duration = "<td colspan=\"3\"><small>N/A</small></td>";
+			}
 
 			$c = $colors[$r['server']];
 
-			echo "<tr class=\"row$a\"><td>$when</td><td style=\"background-color: $c;\">$server</td><td class=\"ralign\" style=\"width: 1.5em;\">$hours</td><td class=\"ralign\" style=\"width: 1.5em;\">$minutes</td><td class=\"ralign\" style=\"width: 1.5em;\">$seconds</td><td class=\"ralign\">$shares</td><td class=\"ralign\">$block</td></tr>\n";
+			echo "<tr class=\"row$a\"><td>$when</td><td style=\"background-color: $c;\">$server</td>$duration<td class=\"ralign\">$shares</td>$status<td class=\"ralign\">$block</td></tr>\n";
 		}
 	}
 

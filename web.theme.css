@@ -88,7 +88,7 @@ a[onclick] {
 }
 
 td.warn {
-	background-color: #FF6700;
+	background-color: #FF6700 !important;
 }
 
 body > table#rfb > thead > tr > th, body > table > tbody > tr > td {

@@ -54,7 +54,7 @@ const OLD_BLOCKS = 250;
 
 require __DIR__.'/lib.util.php';
 require __DIR__.'/lib.cache.php';
-require __DIR__.'/inc.sql.php';
+if(!defined('NO_SQL') || !NO_SQL) require __DIR__.'/inc.sql.php';
 
 /**
  * Update the Pool's hashrate.
