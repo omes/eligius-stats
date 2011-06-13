@@ -174,8 +174,10 @@ function showRecentPayouts($server, $address) {
 
 			if(isset($r['valid']) && $r['valid'] === false) {
 				$reward = '<td class="warn">0 BTC <a title="invalid block" href="javascript:void(0);">?</a></td>';
-			} else {
+			} else if(isset($r['valid']) && $r['valid'] === true) {
 				$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC</td>';
+			} else {
+				$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC <a title="unknown status" href="javascript:void(0);">?</a></td>';
 			}
 
 			if(isset($r['duration'])) {
@@ -187,6 +189,9 @@ function showRecentPayouts($server, $address) {
 
 			echo "<tr class=\"row$a\"><td>$when</td>$duration<td class=\"ralign\">$myShares</td><td class=\"ralign\">$shares</td><td class=\"ralign\">$percentage</td>$reward<td class=\"ralign\">$block</td></tr>\n";
 		}
+
+		$a = ($a + 1) % 2;
+		echo "<tr class=\"row$a\"><td colspan=\"9\"><a href=\"../blocks/".htmlspecialchars($address)."\">Show more for this address…</a></td></tr>\n";
 	}
 
 	echo "</tbody>\n</table>\n";

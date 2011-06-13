@@ -215,7 +215,7 @@ function prettyDuration($duration, $align = false, $precision = 4) {
 	if($duration < 60) return "a few seconds";
 	else if($duration < 300) return "a few minutes";
 
-	$units = array("week" => 7*86400, "day" => 86400, "hour" => 3600, "minute" => 60);
+	$units = array("month" => 30.5 * 86400, "week" => 7*86400, "day" => 86400, "hour" => 3600, "minute" => 60);
 
 	$r = array();
 	foreach($units as $u => $d) {

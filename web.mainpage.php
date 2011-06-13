@@ -178,6 +178,9 @@ function showRecentBlocks() {
 
 			echo "<tr class=\"row$a\"><td>$when</td><td style=\"background-color: $c;\">$server</td>$duration<td class=\"ralign\">$shares</td>$status<td class=\"ralign\">$block</td></tr>\n";
 		}
+
+		$a = ($a + 1) % 2;
+		echo "<tr class=\"row$a\"><td colspan=\"8\"><a href=\"./blocks/\">Show more…</a></td></tr>\n";
 	}
 
 	echo "</tbody>\n</table>\n";

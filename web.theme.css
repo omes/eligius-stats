@@ -15,6 +15,10 @@ td.ralign {
 	text-align: right;
 }
 
+td.lalign {
+	text-align: left;
+}
+
 small {
 	font-size: 0.8em;
 	color: #999;
@@ -98,4 +102,8 @@ body > table#rfb > thead > tr > th, body > table > tbody > tr > td {
 
 table#rfb_indiv {
 	width: 80em;
+}
+
+table#rfb_all {
+	width: 100%;
 }
