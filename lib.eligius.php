@@ -17,7 +17,7 @@
 
 namespace Artefact2\EligiusStats;
 
-const VERSION = '2.0';
+const VERSION = '2.1';
 
 const T_BALANCE_CURRENT_BLOCK = 'balance_current_block';
 const T_BALANCE_UNPAID_REWARD = 'balance_unpaid';
