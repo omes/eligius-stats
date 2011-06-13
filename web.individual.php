@@ -144,10 +144,10 @@ EOT;
 }
 
 function showRecentPayouts($server, $address) {
-	echo "<h2>Recent payouts</h2>\n";
+	echo "<h2>Recent blocks and rewards</h2>\n";
 	$now = time();
 
-	echo "<table id=\"rfb_indiv\">\n<thead>\n<tr><th>▼ When</th><th colspan=\"3\">Round duration</th><th>My shares</th><th>Total shares</th><th>My contribution</th><th>Reward</th><th>Block</th></tr>\n</thead>\n<tbody>\n";
+	echo "<table id=\"rfb_indiv\">\n<thead>\n<tr><th>▼ When</th><th colspan=\"3\">Round duration</th><th>Submitted shares</th><th>Total shares</th><th>Contribution (%)</th><th>Reward</th><th>Block</th></tr>\n</thead>\n<tbody>\n";
 
 	$success = true;
 	$recent = cacheFetch('blocks_recent_'.$server, $success);
