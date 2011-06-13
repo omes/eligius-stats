@@ -19,6 +19,9 @@ a lot of space.
 Recommended crontab :
 
 0    * * * * /path/to/cli.update.php pool_hashrates
+
 */15 * * * * /path/to/cli.update.php balances random_addresses individual_hashrates top_contributors
+
 */3  * * * * /path/to/cli.update.php average_hashrates
+
 *    * * * * /path/to/cli.update.php pool_status recent_blocks
