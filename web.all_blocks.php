@@ -99,12 +99,17 @@ function showBlocks($address = null) {
 			echo "<tr class=\"row$a\"><td>$when</td>$server$duration";
 
 			if($address !== null) {
-				$myShares = isset($r['shares'][$address]) ? $r['shares'][$address] : 0;
-				$percentage = number_format(100 * ($myShares / $shares), 4, '.', ',').' %';
-				$myShares = prettyInt($myShares);
+				if($r['shares'] === null) {
+					$myShares = '<small>N/A</small>';
+					$percentage = '<small>N/A</small>';
+				} else {
+					$myShares = isset($r['shares'][$address]) ? $r['shares'][$address] : 0;
+					$percentage = number_format(100 * ($myShares / $shares), 4, '.', ',').' %';
+					$myShares = prettyInt($myShares);
+				}
 				echo "<td class=\"ralign\">$myShares</td>";
 			}
-			$shares = prettyInt($shares);
+			$shares = ($shares !== null) ? prettyInt($shares) : '<small>N/A</small>';
 			echo "<td class=\"ralign\">$shares</td>";
 
 			if($address !== null) {

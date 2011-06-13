@@ -155,7 +155,7 @@ function showRecentBlocks() {
 			$hash = strtoupper($r['hash']);
 
 			$when = prettyDuration($now - $r['when'], false, 1).' ago';
-			$shares = prettyInt($r['shares_total']);
+			$shares = ($r['shares_total'] !== null) ? prettyInt($r['shares_total']) : '<small>N/A</small>';
 			$server = $SERVERS[$r['server']][0];
 			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -25).'</a>';
 

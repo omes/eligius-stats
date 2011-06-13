@@ -72,6 +72,16 @@ foreach($SERVERS as $name => $d) {
 		updateBlock($recent[$i], $previous);
 	}
 
+	// Try to move the shares from invalid blocks to the next
+	for($i = ($c - 1); $i >= 1; --$i) {
+		maybeProcessInvalidBlock($recent[$i], $recent[$i - 1]);
+	}
+	for($i = ($d - 1); $i >= 0; --$i) {
+		if($i > 0) $previous = $old[$i - 1];
+		else $previous = $recent[$c - 1];
+		maybeProcessInvalidBlock($old[$i], $previous);
+	}
+
 	$s0 = cacheStore('blocks_old_'.$name, $old);
 	$s1 = cacheStore('blocks_recent_'.$name, $recent);
 
@@ -79,6 +89,24 @@ foreach($SERVERS as $name => $d) {
 		trigger_error('Cannot store block metadata for '.$name.' : could not store cached blocks.', E_USER_WARNING);
 		continue;
 	}
+}
+
+function maybeProcessInvalidBlock(&$block, &$nextBlock) {
+	if($block['valid'] !== false) return;
+	if($block['shares_total'] === null && $block['shares'] === null && $block['rewards'] === null) return;
+
+	$nextBlock['shares_total'] += $block['shares_total'];
+
+	foreach($block['shares'] as $address => $s) {
+		if(!isset($nextBlock['shares'][$address])) $nextBlock['shares'][$address] = 0;
+		$nextBlock['shares'][$address] += $s;
+	}
+
+	// Don't add the rewards, because the invalid block generated zero BTC !
+
+	$block['shares'] = null;
+	$block['shares_total'] = null;
+	$block['rewards'] = null;
 }
 
 function updateBlock(&$block, $previousBlock = null) {
