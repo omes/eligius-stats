@@ -164,7 +164,7 @@ function showRecentBlocks() {
 			} else if(isset($r['valid']) && $r['valid'] === false) {
 				$status = '<td class="warn">Invalid</td>';
 			} else {
-				$status = '<td><small>Unknown</small></td>';
+				$status = '<td>Unknown</td>';
 			}
 
 			if(isset($r['duration'])) {

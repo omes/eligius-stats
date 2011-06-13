@@ -39,6 +39,8 @@ function showBlocks($address = null) {
 	echo "<th>Total shares</th>";
 	if($address !== null) {
 		echo "<th>Contribution (%)</th><th>Reward</th>";
+	} else {
+		echo "<th>Status</th>";
 	}
 	echo "<th>Block</th></tr>\n</thead>\n<tbody>\n";
 
@@ -115,6 +117,15 @@ function showBlocks($address = null) {
 				}
 
 				echo "<td class=\"ralign\">$percentage</td>$reward";
+			} else {
+				if(isset($r['valid']) && $r['valid'] === true) {
+					$status = '<td>Valid</td>';
+				} else if(isset($r['valid']) && $r['valid'] === false) {
+					$status = '<td class="warn">Invalid</td>';
+				} else {
+					$status = '<td>Unknown</td>';
+				}
+				echo $status;
 			}
 
 			echo "<td class=\"lalign\">$block</td></tr>\n";
