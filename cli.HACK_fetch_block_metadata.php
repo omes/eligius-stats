@@ -48,6 +48,10 @@ foreach($SERVERS as $name => $d) {
 	$c = count($recent);
 	$d = count($old);
 
+	$cb = function($a, $b) { return $b['when'] - $a['when']; };
+	usort($recent, $cb);
+	usort($old, $cb);
+
 	// Update blocks in the chronological order (oldest blocks first)
 
 	for($i = ($d - 1); $i >= 0; --$i) {
@@ -80,8 +84,6 @@ foreach($SERVERS as $name => $d) {
 function updateBlock(&$block, $previousBlock = null) {
 	global $lackOfConfirmations;
 
-	if(isset($block['has_metadata']) && $block['has_metadata']) return;
-
 	$json = shell_exec('bitcoind getblockbyhash '.$block['hash'].' 2>&1');
 	if(strpos($json, 'error:') === 0) {
 		$block['valid'] = false;
@@ -90,7 +92,6 @@ function updateBlock(&$block, $previousBlock = null) {
 		$block['valid'] = null;
 	} else {
 		$block['valid'] = true;
-		$block['has_metadata'] = true;
 	}
 
 	$bData = json_decode($json, true);

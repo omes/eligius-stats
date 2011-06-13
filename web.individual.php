@@ -143,6 +143,55 @@ EOT;
 	echo "});\n</script>\n";
 }
 
+function showRecentPayouts($server, $address) {
+	echo "<h2>Recent payouts</h2>\n";
+	$now = time();
+
+	echo "<table id=\"rfb_indiv\">\n<thead>\n<tr><th>▼ When</th><th colspan=\"3\">Round duration</th><th>My shares</th><th>Total shares</th><th>My contribution</th><th>Reward</th><th>Block</th></tr>\n</thead>\n<tbody>\n";
+
+	$success = true;
+	$recent = cacheFetch('blocks_recent_'.$server, $success);
+
+	if(!$success) {
+		echo "<tr><td><small>N/A</small></td><td colspan=\"3\"><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
+	} else {
+		$cb = function($a, $b) { return $b['when'] - $a['when']; }; /* Sort in reverse order */
+		usort($recent, $cb);
+
+		$a = 0;
+		foreach($recent as $r) {
+			$a = ($a + 1) % 2;
+
+			$hash = strtoupper($r['hash']);
+
+			$when = prettyDuration($now - $r['when'], false, 1).' ago';
+			$shares = $r['shares_total'];
+			$myShares = isset($r['shares'][$address]) ? $r['shares'][$address] : 0;
+			$percentage = number_format(100 * ($myShares / $shares), 4, '.', ',').' %';
+			$shares = prettyInt($shares);
+			$myShares = prettyInt($myShares);
+			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -25).'</a>';
+
+			if(isset($r['valid']) && $r['valid'] === false) {
+				$reward = '<td class="warn">0 BTC <a title="invalid block" href="javascript:void(0);">?</a></td>';
+			} else {
+				$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC</td>';
+			}
+
+			if(isset($r['duration'])) {
+				list($seconds, $minutes, $hours) = extractTime($r['duration']);
+				$duration = "<td class=\"ralign\" style=\"width: 1.5em;\">$hours</td><td class=\"ralign\" style=\"width: 1.5em;\">$minutes</td><td class=\"ralign\" style=\"width: 1.5em;\">$seconds</td>";
+			} else {
+				$duration = "<td colspan=\"3\"><small>N/A</small></td>";
+			}
+
+			echo "<tr class=\"row$a\"><td>$when</td>$duration<td class=\"ralign\">$myShares</td><td class=\"ralign\">$shares</td><td class=\"ralign\">$percentage</td>$reward<td class=\"ralign\">$block</td></tr>\n";
+		}
+	}
+
+	echo "</tbody>\n</table>\n";
+}
+
 function showHashRateGraph($server, $address) {
 	$uri = '../'.DATA_RELATIVE_ROOT.'/'.T_HASHRATE_INDIVIDUAL.'_'.$server.'_'.$address.DATA_SUFFIX;
 	$ticks = makeTicks();
@@ -258,6 +307,7 @@ showHashrateAverage($server, $address);
 echo "<h2>Graphs</h2>\n";
 showBalanceGraph($server, $address);
 showHashRateGraph($server, $address);
+showRecentPayouts($server, $address);
 
 showFooter();
 

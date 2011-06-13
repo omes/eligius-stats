@@ -95,3 +95,7 @@ body > table#rfb > thead > tr > th, body > table > tbody > tr > td {
 	padding-top: 0.3em;
 	padding-bottom: 0.3em;
 }
+
+table#rfb_indiv {
+	width: 80em;
+}
