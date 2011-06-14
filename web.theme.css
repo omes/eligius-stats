@@ -76,6 +76,8 @@ div.errors > p {
 div.announcements {
 	border: 2px solid #888800;
 	background-color: #FFFF00;
+	padding: 0.5em;
+	clear: right;
 }
 
 div.graph {
@@ -104,4 +106,17 @@ table#rfb_indiv {
 
 table#rfb_all {
 	width: 100%;
+}
+
+footer > p {
+	margin: 0;
+	padding: 0.3em;
+	display: inline-block;
+}
+
+a#announcement_toggle {
+	display: inline-block;
+	float: right;
+	margin: 0;
+	padding-bottom: 0.3em;
 }

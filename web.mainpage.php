@@ -304,24 +304,7 @@ if($_SERVER['QUERY_STRING'] !== "dispatch_request") {
 	die;
 }
 
-echo <<<EOT
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<link type="text/css" rel="stylesheet" href="./web.theme.css">
-<!--[if lte IE 8]><script type="text/javascript" src="./flot/excanvas.min.js"></script><![endif]-->
-<script type="text/javascript" src="./lib.util.js"></script>
-<script type="text/javascript" src="./flot/jquery.js"></script>
-<script type="text/javascript" src="./flot/jquery.flot.js"></script>
-<title>Eligius pool statistics</title>
-</head>
-<body>
-
-EOT;
-echo "<h1>Eligius pool statistics <small>(version ".VERSION."!)</small></h1>\n";
-
-if(file_exists($f = __DIR__.'/inc.announcement.php')) require $f;
+printHeader('Eligius pool statistics', 'Eligius pool statistics <small>(version '.VERSION.'!)</small>', $relative = '.');
 
 showIndividualInstructions();
 showPoolStatuses();
@@ -331,8 +314,4 @@ showRecentBlocks();
 showTopContributors();
 showContributingInstructions();
 
-if(file_exists(__DIR__.'/inc.analytics.php')) {
-	require __DIR__.'/inc.analytics.php';
-}
-
-echo "</body>\n</html>\n";
+printFooter($relative);

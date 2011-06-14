@@ -135,3 +135,37 @@ EligiusUtils.splitHorizontalLine = function(data) {
 
 	return points;
 }
+
+EligiusUtils.toggleAnnouncementVisibility = function() {
+	var announcementClass = $('div#announcements_id').html();
+
+	if($.cookie('a2_hide_announcements') == announcementClass) {
+		$.cookie('a2_hide_announcements', '', { expires: -1, path: '/' });
+		$('.' + announcementClass).slideDown(500);
+	} else {
+		$.cookie('a2_hide_announcements', announcementClass, { expires: 14, path: '/' });
+		$('.' + announcementClass).slideUp(500);
+	}
+
+	EligiusUtils.updateToggleLink();
+}
+
+EligiusUtils.maybeHideAnnouncements = function() {
+	var announcementClass = $('div#announcements_id').html();
+
+	if($.cookie('a2_hide_announcements') == announcementClass) {
+		$('.' + announcementClass).css('display', 'none');
+	}
+
+	EligiusUtils.updateToggleLink();
+}
+
+EligiusUtils.updateToggleLink = function() {
+	var announcementClass = $('div#announcements_id').html();
+
+	if($.cookie('a2_hide_announcements') == announcementClass) {
+		$('a#announcement_toggle').html('Show announcements [^]');
+	} else {
+		$('a#announcement_toggle').html('Hide announcements [X]');
+	}
+}

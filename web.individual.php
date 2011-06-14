@@ -35,15 +35,6 @@ function makeTicks() {
 	return '['.implode(', ', $ticks).']';
 }
 
-function showFooter() {
-	echo <<<EOT
-<hr />
-<p><a href="../">&larr; Get back to the main page</a></p>
-<p><a onclick="EligiusUtils.toggleAutorefresh();">Toggle autorefresh</a><small id="autorefresh_message"></small></p>
-EOT;
-
-}
-
 function showHashrateAverage($server, $address) {
 	$averages_long = cacheFetch('average_hashrates_long', $success0);
 	$averages_short = cacheFetch('average_hashrates_short', $success1);
@@ -269,18 +260,8 @@ if(preg_match('%\.htm$%Di', $address)) {
 
 if(!isset($SERVERS[$server])) {
 	header('HTTP/1.1 404 Not Found', true, 404);
-	echo <<<EOT
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<link type="text/css" rel="stylesheet" href="../web.theme.css">
-</head>
-<body>
-<h1>Unknown server !</h1>
-EOT;
-	showFooter();
-	echo "</body>\n</html>\n";
+	header('Content-Type: text/plain');
+	echo "Unknown server.\n";
 	die;
 }
 
@@ -290,67 +271,28 @@ $addresses = getActiveAddresses($apiRoot);
 list(, $unpaid, $current) = getBalance($apiRoot, $address);
 $total = bcadd($unpaid, $current, 8).' BTC';
 
+printHeader("($total) $address on $prettyName - Eligius pool", "$address on $prettyName", $relative = '..');
+
 if(!in_array($address, $addresses)) {
-	header('HTTP/1.1 404 Not Found', true, 404);
 	echo <<<EOT
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<link type="text/css" rel="stylesheet" href="../web.theme.css">
-</head>
-<body>
 <h1>Unknown address !</h1>
 <p>Sorry man, I have no data for this address. Here is maybe why :</p>
 <ul>
 <li>There is a typo in your address. Make sure <strong>$address</strong> is a valid Bitcoin address, and is yours !</li>
-<li>You just started mining. Give it a few minutes, and the stats will show up.</li>
+<li>You just started mining. The stats usually show up a few minutes after the first submitted share.</li>
 <li>You haven't mined for a week. No stats for you !</li>
 <li>There is a problem with the API (very unlikely). If the problem persists, and you're aware of all all the text above, then join us on IRC for help (the link is at the bottom of the main page).</li>
 </ul>
-EOT;
-	showFooter();
-	echo "</body>\n</html>\n";
-	die;
-}
-
-echo <<<EOT
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<link type="text/css" rel="stylesheet" href="../web.theme.css">
-<!--[if lte IE 8]><script type="text/javascript" src="../flot/excanvas.min.js"></script><![endif]-->
-<script type="text/javascript" src="../lib.util.js"></script>
-<script type="text/javascript" src="../flot/jquery.js"></script>
-<script type="text/javascript" src="../flot/jquery.flot.js"></script>
-<script type="text/javascript" src="../flot/jquery.flot.stack.js"></script>
-<title>($total) $address on $prettyName - Eligius pool</title>
-</head>
-<body>
 
 EOT;
-
-echo "<h1>$address on $prettyName</h1>\n";
-
-if(file_exists($f = __DIR__.'/inc.announcement.php')) require $f;
-
-showBalance($unpaid, $current);
-showHashrateAverage($server, $address);
-echo "<h2>Graphs</h2>\n";
-showBalanceGraph($server, $address);
-showHashRateGraph($server, $address);
-showRecentPayouts($server, $address);
-
-showFooter();
-
-if(file_exists(__DIR__.'/inc.analytics.php')) {
-	require __DIR__.'/inc.analytics.php';
+} else {
+	showBalance($unpaid, $current);
+	showHashrateAverage($server, $address);
+	echo "<h2>Graphs</h2>\n";
+	showBalanceGraph($server, $address);
+	showHashRateGraph($server, $address);
+	showRecentPayouts($server, $address);
 }
 
-if(isset($_GET['autorefresh']) && $_GET['autorefresh']) {
-	echo "<script type=\"text/javascript\">EligiusUtils.toggleAutorefresh();</script>\n";
-}
-
-echo "</body>\n</html>\n";
-die;
+printFooter($relative, ' <p>- <a onclick="EligiusUtils.toggleAutorefresh();">Toggle autorefresh</a><span id="autorefresh_message"></span></p>'."\n".
+	((isset($_GET['autorefresh']) && $_GET['autorefresh']) ? "<script type=\"text/javascript\">EligiusUtils.toggleAutorefresh();</script>" : ''));

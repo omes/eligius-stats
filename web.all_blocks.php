@@ -20,14 +20,6 @@ namespace Artefact2\EligiusStats;
 require __DIR__.'/lib.eligius.php';
 require __DIR__.'/inc.servers.php';
 
-function showFooter() {
-	echo <<<EOT
-<hr />
-<p><a href="../">&larr; Get back to the main page</a></p>
-EOT;
-
-}
-
 function showBlocks($address = null) {
 	global $SERVERS;
 	$now = time();
@@ -147,31 +139,10 @@ $address = array_pop($uri);
 
 if(!$address) $address = null;
 
-echo <<<EOT
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<link type="text/css" rel="stylesheet" href="../web.theme.css">
-<title>Blocks found by the Eligius pool</title>
-</head>
-<body>
-
-EOT;
-
-echo "<h1>Blocks found by the pool</h1>\n";
+printHeader('Blocks found by the Eligius pool', 'Blocks found by the pool', $relative = '..', false);
 if($address !== null) {
 	echo "<h2>Showing shares and rewards of the address : ".htmlspecialchars($address)."</h2>";
 }
 
-if(file_exists($f = __DIR__.'/inc.announcement.php')) require $f;
-
 showBlocks($address);
-showFooter();
-
-if(file_exists(__DIR__.'/inc.analytics.php')) {
-	require __DIR__.'/inc.analytics.php';
-}
-
-echo "</body>\n</html>\n";
-die;
+printFooter($relative);

@@ -321,3 +321,81 @@ function prettyTooltip($message) {
 	$message = htmlspecialchars($message);
 	return "<a href=\"javascript:void(0);\" title=\"$message\">?</a>";
 }
+
+/**
+ * Print the basic xHTML header of a page.
+ * @param string $title the title written in <title>
+ * @param string $shownTitle the title written in <h1>
+ * @param string $relativePathToRoot the path to get to the root from this page, WITHOUT any trailing /
+ * @param bool $includeJquery if true, include the JQuery javascript files.
+ * @return void
+ */
+function printHeader($title, $shownTitle, $relativePathToRoot = '.', $includeJquery = true) {
+	echo <<<EOT
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link type="text/css" rel="stylesheet" href="$relativePathToRoot/web.theme.css">
+
+EOT;
+	if($includeJquery) echo <<<EOT
+<!--[if lte IE 8]><script type="text/javascript" src="$relativePathToRoot/flot/excanvas.min.js"></script><![endif]-->
+<script type="text/javascript" src="$relativePathToRoot/lib.util.js"></script>
+<script type="text/javascript" src="$relativePathToRoot/flot/jquery.min.js"></script>
+<script type="text/javascript" src="$relativePathToRoot/flot/jquery.flot.min.js"></script>
+<script type="text/javascript" src="$relativePathToRoot/flot/jquery.flot.stack.min.js"></script>
+<script type="text/javascript" src="$relativePathToRoot/jquery-cookie/jquery.cookie.js"></script>
+
+EOT;
+
+	echo <<<EOT
+<title>$title</title>
+</head>
+<body>
+<h1>$shownTitle</h1>
+
+EOT;
+
+	if(file_exists(__DIR__.'/inc.announcement.php')) {
+		echo "<p><a id=\"announcement_toggle\" href=\"javascript:void(0);\" onclick=\"EligiusUtils.toggleAnnouncementVisibility();\">Toggle announcements visibility</a></p>";
+		require __DIR__.'/inc.announcement.php';
+	}
+
+	if($includeJquery) echo <<<EOT
+<script type="text/javascript">
+EligiusUtils.maybeHideAnnouncements();
+</script>
+
+EOT;
+
+}
+
+/**
+ * Print the footer of any xHTML page.
+ * @param string $relative the path to get to the root from this page, WITHOUT any trailing /
+ * @param string $more optional text to print in the footer
+ * @return void
+ */
+function printFooter($relative, $more = '') {
+	echo <<<EOT
+<footer>
+<hr />
+<p style="float: right;">
+<a href="https://github.com/Artefact2/eligius-stats">Source</a> - <a href="http://eligius.st/">Eligius Wiki</a> - Donate to <a href="bitcoin:1666R5kdy7qK2RDALPJQ6Wt1czdvn61CQR">1666R5kdy7qK2RDALPJQ6Wt1czdvn61CQR</a> !
+</p>
+EOT;
+	if(file_exists(__DIR__.'/inc.analytics.php')) {
+		require __DIR__.'/inc.analytics.php';
+	}
+	if($relative != '.') {
+		echo "<p><a href=\"$relative/\">&larr; Get back to the main page</a></p>\n";
+	}
+	echo <<<EOT
+$more
+</footer>
+</body>
+</html>
+
+EOT;
+}
