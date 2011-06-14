@@ -56,37 +56,48 @@ function showPoolStatuses() {
 	} else $statuses = array();
 
 	foreach($SERVERS_ADDRESSES as $serverName => $data) {
+		unset($status);
 		list(, $fAddress) = $data;
 
-		if(isset($statuses[$serverName]['status'])) {
-			$status = $statuses[$serverName]['status'];
-
-			if(isset($statuses[$serverName]['latency'])) {
-				$latency = $statuses[$serverName]['latency'];
-				if($latency < 1.0) {
-					$latency = "< 1s";
-				} else $latency = number_format($latency, 2).' s';
-			} else $latency = '<small>N/A</small>';
-
-			if(isset($statuses[$serverName]['since'])) {
-				$uptime = time() - $statuses[$serverName]['since'];
-				$uptime = prettyDuration($uptime);
-				if($status !== S_WORKING) {
-					$uptime = 'Downtime : '.$uptime;
-					$latency = '<small>N/A</small>';
-				}
-			} else $uptime = '<small>N/A</small>';
-
-			if(isset($statuses[$serverName]['last-updated'])) {
-				$lastUpdated = $statuses[$serverName]['last-updated'];
-			}
+		if(isset($data[2])) {
+			$status = S_CUSTOM;
 		} else {
-			$latency = '<small>N/A</small>';
-			$status = S_UNKNOWN;
-			$uptime = '<small>N/A</small>';
+			if(isset($statuses[$serverName]['status'])) {
+				$status = $statuses[$serverName]['status'];
+
+				if(isset($statuses[$serverName]['latency'])) {
+					$latency = $statuses[$serverName]['latency'];
+					if($latency < 1.0) {
+						$latency = "< 1s";
+					} else $latency = number_format($latency, 2).' s';
+				} else $latency = '<small>N/A</small>';
+
+				if(isset($statuses[$serverName]['since'])) {
+					$uptime = time() - $statuses[$serverName]['since'];
+					$uptime = prettyDuration($uptime);
+					if($status !== S_WORKING) {
+						$uptime = 'Downtime : '.$uptime;
+						$latency = '<small>N/A</small>';
+					}
+				} else $uptime = '<small>N/A</small>';
+
+				if(isset($statuses[$serverName]['last-updated'])) {
+					$lastUpdated = $statuses[$serverName]['last-updated'];
+				}
+			} else {
+				$latency = '<small>N/A</small>';
+				$status = S_UNKNOWN;
+				$uptime = '<small>N/A</small>';
+			}
 		}
 
-		if($status == S_UNKNOWN) {
+		if($status == S_CUSTOM) {
+			$status = $data[2];
+			$color = '#CDCDCD';
+			$textColor = '#000000';
+			$uptime = '<small>N/A</small>';
+			$latency = '<small>N/A</small>';
+		} else if($status == S_UNKNOWN) {
 			$status = 'Unknown';
 			$color = '#FF6700';
 			$textColor = '#000000';

@@ -36,6 +36,7 @@ const HASHRATE_LAG = 180; // Use a 3-minute delay, to cope with MySQL replicatio
 const TIMESPAN_SHORT = 604800; // Store at most 7 days of data for short-lived graphs
 const TIMESPAN_LONG = 2678400; // Store at most 31 days of data for long-lived graphs
 
+const S_CUSTOM = -2;
 const S_UNKNOWN = -1;
 const S_WORKING = 0;
 const S_INVALID_WORK = 1;
