@@ -46,8 +46,8 @@ foreach($SERVERS as $name => $d) {
 }
 
 function recountBlock($server, &$bData) {
-	$start = $bData['when'];
-	$end = $start + $bData['duration'];
+	$end = $bData['when'];
+	$start = $end - $bData['duration'];
 
 	$q = mysql_query("
 		SELECT username, COUNT(*) AS fshares
