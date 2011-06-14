@@ -296,6 +296,12 @@ function updateAverageHashrates() {
 	return $a && $b;
 }
 
+/**
+ * Cache the block information (shares, rewards, …)
+ * @param string $server cache the blocks found by this server
+ * @param string $apiRoot the API root for this server
+ * @return bool true if the operation succeeded.
+ */
 function updateBlocks($server, $apiRoot) {
 	$recent = cacheFetch('blocks_recent_'.$server, $success0);
 	$old = cacheFetch('blocks_old_'.$server, $success1);
