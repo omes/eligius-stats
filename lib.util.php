@@ -311,3 +311,13 @@ function extractTime($d) {
 
 	return array($seconds, $minutes, $hours);
 }
+
+/**
+ * Return the xHTML code for a "pretty" tooltip.
+ * @param string $message the tooltip message
+ * @return string a pretty tooltip "?" that hovers the message
+ */
+function prettyTooltip($message) {
+	$message = htmlspecialchars($message);
+	return "<a href=\"javascript:void(0);\" title=\"$message\">?</a>";
+}

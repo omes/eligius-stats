@@ -172,18 +172,24 @@ function showRecentPayouts($server, $address) {
 
 			$when = prettyDuration($now - $r['when'], false, 1).' ago';
 			$shares = $r['shares_total'];
-			$myShares = isset($r['shares'][$address]) ? $r['shares'][$address] : 0;
-			$percentage = number_format(100 * ($myShares / $shares), 4, '.', ',').' %';
-			$shares = prettyInt($shares);
-			$myShares = prettyInt($myShares);
+			if($shares === null) {
+				$shares = '<small>N/A</small>';
+				$myShares = '<small>N/A</small>';
+				$percentage = '<small>N/A</small>';
+			} else {
+				$myShares = isset($r['shares'][$address]) ? $r['shares'][$address] : 0;
+				$percentage = number_format(100 * ($myShares / $shares), 4, '.', ',').' %';
+				$shares = prettyInt($shares);
+				$myShares = prettyInt($myShares);
+			}
 			$block = '<a href="http://blockexplorer.com/block/'.$r['hash'].'" title="'.$hash.'">…'.substr($hash, -25).'</a>';
 
 			if(isset($r['valid']) && $r['valid'] === false) {
-				$reward = '<td class="warn">0 BTC <a title="invalid block" href="javascript:void(0);">?</a></td>';
+				$reward = '<td class="warn">0 BTC '.prettyTooltip('Invalid block').'</td>';
 			} else if(isset($r['valid']) && $r['valid'] === true) {
 				$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC</td>';
 			} else {
-				$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC <a title="unknown status" href="javascript:void(0);">?</a></td>';
+				$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC '.prettyTooltip('Unconfirmed block').'</td>';
 			}
 
 			if(isset($r['duration'])) {

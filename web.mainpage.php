@@ -164,7 +164,7 @@ function showRecentBlocks() {
 			} else if(isset($r['valid']) && $r['valid'] === false) {
 				$status = '<td class="warn">Invalid</td>';
 			} else {
-				$status = '<td>Unknown</td>';
+				$status = '<td>Unconfirmed '.prettyTooltip('This block does not have got its 120 confirmations yet.').'</td>';
 			}
 
 			if(isset($r['duration'])) {

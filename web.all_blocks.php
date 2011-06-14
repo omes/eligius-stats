@@ -114,11 +114,11 @@ function showBlocks($address = null) {
 
 			if($address !== null) {
 				if(isset($r['valid']) && $r['valid'] === false) {
-					$reward = '<td class="warn">0 BTC <a title="invalid block" href="javascript:void(0);">?</a></td>';
+					$reward = '<td class="warn">0 BTC '.prettyTooltip('Invalid block').'</td>';
 				} else if(isset($r['valid']) && $r['valid'] === true) {
 					$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC</td>';
 				} else {
-					$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC <a title="unknown status" href="javascript:void(0);">?</a></td>';
+					$reward = '<td>'.(isset($r['rewards'][$address]) ? $r['rewards'][$address] : 0).' BTC '.prettyTooltip('Unconfirmed block').'</td>';
 				}
 
 				echo "<td class=\"ralign\">$percentage</td>$reward";
@@ -128,7 +128,7 @@ function showBlocks($address = null) {
 				} else if(isset($r['valid']) && $r['valid'] === false) {
 					$status = '<td class="warn">Invalid</td>';
 				} else {
-					$status = '<td>Unknown</td>';
+					$status = '<td>Unconfirmed '.prettyTooltip('This block does not have got its 120 confirmations yet.').'</td>';
 				}
 				echo $status;
 			}
