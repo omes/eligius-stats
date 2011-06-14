@@ -292,30 +292,30 @@ function updateAverageHashrates() {
 
 		$start = $end - HASHRATE_AVERAGE;
 		$q = mysql_query("
-			SELECT username AS address, server, COUNT(*) AS shares
+			SELECT username AS address, server, COUNT(*) AS shares, reason
 			FROM shares
 			WHERE our_result <> 'Y'
 				AND time BETWEEN $start AND $end
-			GROUP BY server, username
+			GROUP BY server, username, reason
 			ORDER BY time DESC
 		");
 
 		while($r = mysql_fetch_assoc($q)) {
-			$averages3h['invalid'][$r['server']][$r['address']] = $r['shares'];
+			$averages3h['invalid'][$r['server']][$r['address']][$r['reason']] = $r['shares'];
 		}
 
 		$start = $end - HASHRATE_AVERAGE_SHORT;
 		$q = mysql_query("
-			SELECT username AS address, server, COUNT(*) AS shares
+			SELECT username AS address, server, COUNT(*) AS shares, reason
 			FROM shares
 			WHERE our_result <> 'Y'
 				AND time BETWEEN $start AND $end
-			GROUP BY server, username
+			GROUP BY server, username, reason
 			ORDER BY time DESC
 		");
 
 		while($r = mysql_fetch_assoc($q)) {
-			$averages15min['invalid'][$r['server']][$r['address']] = $r['shares'];
+			$averages15min['invalid'][$r['server']][$r['address']][$r['reason']] = $r['shares'];
 		}
 	}
 

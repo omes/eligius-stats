@@ -59,8 +59,8 @@ function showHashrateAverage($server, $address) {
 		$long = isset($averages_long['valid'][$server][$address]) ? prettyHashrate($averages_long['valid'][$server][$address][1]) : prettyHashrate(0);
 		$sharesShort = isset($averages_short['valid'][$server][$address]) ? $averages_short['valid'][$server][$address][0] : 0;
 		$sharesLong = isset($averages_long['valid'][$server][$address]) ? $averages_long['valid'][$server][$address][0] : 0;
-		$rejectedSharesShort = isset($averages_short['invalid'][$server][$address]) ? $averages_short['invalid'][$server][$address] : 0;
-		$rejectedSharesLong = isset($averages_long['invalid'][$server][$address]) ? $averages_long['invalid'][$server][$address] : 0;
+		$rejectedSharesShort = isset($averages_short['invalid'][$server][$address]) ? array_sum($averages_short['invalid'][$server][$address]) : 0;
+		$rejectedSharesLong = isset($averages_long['invalid'][$server][$address]) ? array_sum($averages_long['invalid'][$server][$address]) : 0;
 		if($sharesShort == 0) {
 			$sClass = ' class="warn"';
 		} else $sClass = '';
@@ -71,9 +71,25 @@ function showHashrateAverage($server, $address) {
 		$rejectedSharesShortPercentage = number_format(100 * ($rejectedSharesShort) / ($rejectedSharesShort + $sharesShort), 2). ' %';
 		$rejectedSharesLongPercentage = number_format(100 * ($rejectedSharesLong) / ($rejectedSharesLong + $sharesLong), 2). ' %';
 
+		if(isset($averages_long['invalid'][$server][$address]) && $rejectedSharesLong > 0) {
+			$reasons = array();
+			foreach($averages_long['invalid'][$server][$address] as $reason => $count) {
+				$reasons[] = $reason.' : '.$count;
+			}
+			$longTooltip = prettyTooltip(implode(', ', $reasons));
+		} else $longTooltip = '';
+
+		if(isset($averages_short['invalid'][$server][$address]) && $rejectedSharesShort > 0) {
+			$reasons = array();
+			foreach($averages_short['invalid'][$server][$address] as $reason => $count) {
+				$reasons[] = $reason.' : '.$count;
+			} 
+			$shortTooltip = prettyTooltip(implode(', ', $reasons));
+		} else $shortTooltip = '';
+
 		echo "<tr><td>Hashrate</td><td$lClass><strong class=\"moremore\">$long</strong></td><td$sClass>$short</td></tr>\n";
 		echo "<tr><td>Submitted valid shares</td><td$lClass>$sharesLong</td><td$sClass>$sharesShort</td></tr>\n";
-		echo "<tr><td>Submitted invalid shares</td><td$lClass>$rejectedSharesLong ($rejectedSharesLongPercentage)</td><td$sClass>$rejectedSharesShort ($rejectedSharesShortPercentage)</td></tr>\n";
+		echo "<tr><td>Submitted invalid shares</td><td$lClass>$rejectedSharesLong $longTooltip ($rejectedSharesLongPercentage)</td><td$sClass>$rejectedSharesShort $shortTooltip ($rejectedSharesShortPercentage)</td></tr>\n";
 	}
 
 	echo "</tbody>\n</table>\n";
