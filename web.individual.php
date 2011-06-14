@@ -55,10 +55,12 @@ function showHashrateAverage($server, $address) {
 		echo "<tr><td>Submitted shares</td><td><small>N/A</small></td><td><small>N/A</small></td></tr>\n";
 		$error = "<p>The averages are not available at the moment. <strong class=\"more\">The graphed data below may be wrong.</strong> Try later !</p>\n";
 	} else {
-		$short = isset($averages_short[$server][$address]) ? prettyHashrate($averages_short[$server][$address][1]) : prettyHashrate(0);
-		$long = isset($averages_long[$server][$address]) ? prettyHashrate($averages_long[$server][$address][1]) : prettyHashrate(0);
-		$sharesShort = isset($averages_short[$server][$address]) ? $averages_short[$server][$address][0] : 0;
-		$sharesLong = isset($averages_long[$server][$address]) ? $averages_long[$server][$address][0] : 0;
+		$short = isset($averages_short['valid'][$server][$address]) ? prettyHashrate($averages_short['valid'][$server][$address][1]) : prettyHashrate(0);
+		$long = isset($averages_long['valid'][$server][$address]) ? prettyHashrate($averages_long['valid'][$server][$address][1]) : prettyHashrate(0);
+		$sharesShort = isset($averages_short['valid'][$server][$address]) ? $averages_short['valid'][$server][$address][0] : 0;
+		$sharesLong = isset($averages_long['valid'][$server][$address]) ? $averages_long['valid'][$server][$address][0] : 0;
+		$rejectedSharesShort = isset($averages_short['invalid'][$server][$address]) ? $averages_short['invalid'][$server][$address] : 0;
+		$rejectedSharesLong = isset($averages_long['invalid'][$server][$address]) ? $averages_long['invalid'][$server][$address] : 0;
 		if($sharesShort == 0) {
 			$sClass = ' class="warn"';
 		} else $sClass = '';
@@ -66,8 +68,12 @@ function showHashrateAverage($server, $address) {
 			$lClass = ' class="warn"';
 		} else $lClass = '';
 
+		$rejectedSharesShortPercentage = number_format(100 * ($rejectedSharesShort) / ($rejectedSharesShort + $sharesShort), 2). ' %';
+		$rejectedSharesLongPercentage = number_format(100 * ($rejectedSharesLong) / ($rejectedSharesLong + $sharesLong), 2). ' %';
+
 		echo "<tr><td>Hashrate</td><td$lClass><strong class=\"moremore\">$long</strong></td><td$sClass>$short</td></tr>\n";
-		echo "<tr><td>Submitted shares</td><td$lClass>$sharesLong</td><td$sClass>$sharesShort</td></tr>\n";
+		echo "<tr><td>Submitted valid shares</td><td$lClass>$sharesLong</td><td$sClass>$sharesShort</td></tr>\n";
+		echo "<tr><td>Submitted invalid shares</td><td$lClass>$rejectedSharesLong ($rejectedSharesLongPercentage)</td><td$sClass>$rejectedSharesShort ($rejectedSharesShortPercentage)</td></tr>\n";
 	}
 
 	echo "</tbody>\n</table>\n";

@@ -243,7 +243,6 @@ function updateRandomAddress($serverName, $apiRoot) {
  */
 function updateAverageHashrates() {
 	$end = time() - HASHRATE_LAG;
-	$start = $end - HASHRATE_AVERAGE;
 	
 	$wStart = time() - HASHRATE_LAG - 60;
 	$isWorking = mysql_query("
@@ -258,6 +257,10 @@ function updateAverageHashrates() {
 		$averages3h = array();
 		$averages15min = array();
 	} else {
+		$averages3h = array();
+		$averages15min = array();
+
+		$start = $end - HASHRATE_AVERAGE;
 		$q = mysql_query("
 			SELECT username AS address, server, COUNT(*) AS shares
 			FROM shares
@@ -267,10 +270,9 @@ function updateAverageHashrates() {
 			ORDER BY time DESC
 		");
 
-		$averages3h = array();
 		while($r = mysql_fetch_assoc($q)) {
 			$rate = floatval(bcdiv(bcmul($r['shares'], bcpow(2, 32)), HASHRATE_AVERAGE));
-			$averages3h[$r['server']][$r['address']] = array($r['shares'], $rate);
+			$averages3h['valid'][$r['server']][$r['address']] = array($r['shares'], $rate);
 		}
 
 		$start = $end - HASHRATE_AVERAGE_SHORT;
@@ -283,10 +285,37 @@ function updateAverageHashrates() {
 			ORDER BY time DESC
 		");
 
-		$averages15min = array();
 		while($r = mysql_fetch_assoc($q)) {
 			$rate = floatval(bcdiv(bcmul($r['shares'], bcpow(2, 32)), HASHRATE_AVERAGE_SHORT));
-			$averages15min[$r['server']][$r['address']] = array($r['shares'], $rate);
+			$averages15min['valid'][$r['server']][$r['address']] = array($r['shares'], $rate);
+		}
+
+		$start = $end - HASHRATE_AVERAGE;
+		$q = mysql_query("
+			SELECT username AS address, server, COUNT(*) AS shares
+			FROM shares
+			WHERE our_result <> 'Y'
+				AND time BETWEEN $start AND $end
+			GROUP BY server, username
+			ORDER BY time DESC
+		");
+
+		while($r = mysql_fetch_assoc($q)) {
+			$averages3h['invalid'][$r['server']][$r['address']] = $r['shares'];
+		}
+
+		$start = $end - HASHRATE_AVERAGE_SHORT;
+		$q = mysql_query("
+			SELECT username AS address, server, COUNT(*) AS shares
+			FROM shares
+			WHERE our_result <> 'Y'
+				AND time BETWEEN $start AND $end
+			GROUP BY server, username
+			ORDER BY time DESC
+		");
+
+		while($r = mysql_fetch_assoc($q)) {
+			$averages15min['invalid'][$r['server']][$r['address']] = $r['shares'];
 		}
 	}
 
